@@ -7,6 +7,8 @@ on:
 
 permissions:
   contents: write
+  pages: write
+  id-token: write
 
 jobs:
   apk:
@@ -89,3 +91,33 @@ jobs:
           cp android/app/build/outputs/apk/debug/app-debug.apk Sprint.apk
           gh release delete latest --cleanup-tag --yes || true
           gh release create latest Sprint.apk --title "Спринт" --notes "Свежая сборка из ветки main." --latest
+
+  site:
+    needs: apk
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: sprint-apk
+          path: apk-in
+
+      - name: Сборка сайта
+        run: |
+          mkdir -p _site/apk
+          cp -r index.html site docs _site/
+          cp apk-in/app-debug.apk _site/apk/Sprint.apk
+          touch _site/.nojekyll
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - id: deploy
+        uses: actions/deploy-pages@v4

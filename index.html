@@ -1,73 +1,270 @@
 <!doctype html>
 <html lang="ru">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Спринт: скачать игру</title>
-<meta name="description" content="Мобильная игра про бег. Тапай в такт, не выдохнись и обгоняй друзей в дуэлях.">
-<link rel="stylesheet" href="site/css/fonts.css">
-<link rel="stylesheet" href="site/css/style.css">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>Спринт: скачать APK</title>
+    <meta name="description" content="Мобильная игра про бег. Жми в такт, не выдохнись, обгоняй друзей в дуэлях и добирайся до рекордов Болта. Бесплатно, Android.">
+    <meta name="theme-color" content="#0a0a0a">
+    <meta property="og:title" content="Спринт">
+    <meta property="og:description" content="Одна кнопка, настоящая усталость и рекорды Болта в конце пути. Бесплатно, Android.">
+    <meta property="og:image" content="https://maks3592.github.io/sprint/site/img/hero.jpg">
+    <meta property="og:type" content="website">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%230a0a0a'/%3E%3Cpath d='M14 50 L30 14 H40 L24 50Z M32 50 L48 14 H54 L38 50Z' fill='%23f2f2f2'/%3E%3C/svg%3E">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@600;800;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="site/css/style.css?v=1">
+    <link rel="stylesheet" href="site/css/extra.css?v=1">
 </head>
 <body>
-<header class="top">
-  <a class="logo" href="#">СПРИНТ</a>
-  <nav><a href="#feel">Ощущения</a><a href="#modes">Режимы</a><a href="#install">Установка</a></nav>
-</header>
+    <a id="top"></a>
+    <div class="grain" aria-hidden="true"></div>
 
-<section class="hero">
-  <div class="hero-text">
-    <p class="kicker">Android · бесплатно</p>
-    <h1>Один палец.<br>Один <span>ритм.</span><br>Ноль шансов выдохнуть.</h1>
-    <p class="lead">Тапай в такт, разгоняйся, прокачивай ноги. А если выложился слишком сильно, бегун упадёт в обморок прямо на дорожке.</p>
-    <a class="btn" id="dl" href="https://github.com/maks3592/sprint/releases/latest/download/Sprint.apk">Скачать APK</a>
-    <p class="note" id="dlNote">Файл около 10 МБ. Нужен Android 7 или новее.</p>
-    <div class="bar" id="bar" hidden><i></i></div>
-  </div>
-  <div class="shots">
-    <img src="docs/screenshot-home.png" alt="Главный экран" loading="lazy">
-    <img src="docs/screenshot-train.png" alt="Тренировки" loading="lazy">
-    <img src="docs/screenshot-duel.png" alt="Дуэль" loading="lazy">
-  </div>
-</section>
+    <header class="nav">
+        <a class="logo" href="#top" aria-label="Спринт, наверх">
+            <svg viewBox="0 0 40 24" aria-hidden="true"><path d="M2 22 L12 2 H18 L8 22Z M14 22 L24 2 H30 L20 22Z M26 22 L36 2 H40 L30 22Z"/></svg>
+            <span>Спринт</span>
+        </a>
+        <nav class="nav-links" aria-label="Разделы">
+            <a href="#records">Рекорды</a>
+            <a href="#idea">Идея</a>
+            <a href="#facts">Факты</a>
+            <a href="#calc">Прикинь</a>
+            <a href="#duel">Дуэли</a>
+        </nav>
+        <a class="btn btn-ghost btn-sm js-download" href="apk/Sprint.apk" download>Скачать</a>
+    </header>
 
-<div class="marquee"><div><span>60 М</span><span>100 М</span><span>150 М</span><span>200 М</span><span>ДУЭЛИ</span><span>ОБМОРОКИ</span><span>РЕКОРДЫ МИРА</span><span>60 М</span><span>100 М</span><span>150 М</span><span>200 М</span><span>ДУЭЛИ</span><span>ОБМОРОКИ</span><span>РЕКОРДЫ МИРА</span></div></div>
+    <main>
+        <section class="hero" aria-labelledby="hero-title">
+            <div class="hero-frame" aria-hidden="true"></div>
+            <figure class="hero-figure">
+                <img src="site/img/hero.jpg" alt="Бегун на низком старте на красной дорожке стадиона" width="1200" height="1500" fetchpriority="high">
+            </figure>
 
-<section id="feel" class="sec">
-  <h2>Усталость тут настоящая</h2>
-  <div class="grid">
-    <article><b>01</b><h3>Силы кончаются</h3><p>Дотащился до конца 200 метров еле живым? Минуту реального времени ты не бегун. Выйдешь раньше и упадёшь на полпути.</p></article>
-    <article><b>02</b><h3>Экран устаёт вместе с тобой</h3><p>Темнеют края, красная вуаль, дрожит камера. Слышно тяжёлое дыхание и сердце.</p></article>
-    <article><b>03</b><h3>Такт решает всё</h3><p>Зелёное кольцо на кнопке и метка внизу. Попал, скорость растёт. Промахнулся, бегун буксует.</p></article>
-  </div>
-</section>
+            <div class="hero-content">
+                <p class="eyebrow reveal">Android · бесплатно · рекорды настоящие</p>
+                <h1 id="hero-title" class="hero-title">
+                    <span class="line reveal">Один</span>
+                    <span class="line reveal">палец.</span>
+                    <span class="line line-outline reveal">Спринт</span>
+                </h1>
+                <p class="hero-lead reveal">Жмёшь кнопку в такт, и бегун летит. Сбился с ритма, и он буксует. Выложился на максимум, и через минуту ноги не побегут вообще. Где-то в конце пути ждёт Болт с его 9,58.</p>
 
-<section id="modes" class="sec dark">
-  <h2>Чем заняться</h2>
-  <div class="grid four">
-    <article><h3>Забеги</h3><p>60, 100, 150, 200 метров. Дальние открываются быстрыми стартами.</p></article>
-    <article><h3>Прыжок</h3><p>С места. Качает ноги и приносит монеты.</p></article>
-    <article><h3>Скакалка</h3><p>Держи серию в ритм и не сбейся.</p></article>
-    <article><h3>Дуэли</h3><p>Код из четырёх цифр, друг вводит, вы на одной дорожке.</p></article>
-  </div>
-  <p class="wide">Прокачался до потолка? Перерождайся. Потолок вырастет, монет станет больше. Рекорды мира падают только после трёх перерождений.</p>
-</section>
+                <div class="cta reveal">
+                    <a class="btn btn-primary js-download" href="apk/Sprint.apk" download>
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0-5-5m5 5 5-5M4 21h16"/></svg>
+                        <span>Скачать APK</span>
+                    </a>
+                    <div class="cta-meta">
+                        <span class="js-size">4,1 МБ</span> · Android 7.0+<br>
+                        <span class="js-count">—</span> <span class="js-count-label">скачиваний с сайта</span>
+                    </div>
+                </div>
+            </div>
 
-<section id="install" class="sec">
-  <h2>Как поставить</h2>
-  <ol class="steps">
-    <li><b>Скачай</b> файл кнопкой выше прямо на телефоне.</li>
-    <li><b>Разреши</b> установку из браузера, когда Android спросит. Это нормально для приложений не из магазина.</li>
-    <li><b>Открой</b> файл и жми «Установить».</li>
-    <li><b>Беги.</b> Для дуэли нужен интернет и друг с такой же игрой.</li>
-  </ol>
-</section>
+            <div class="hero-bottom" aria-hidden="true">
+                <span class="js-pager">001 <em>/ 008</em></span>
+                <a href="#records" class="scroll-cue">Листайте <span class="arrow">↓</span></a>
+                <span class="hero-bottom-right">Three.js · Capacitor</span>
+            </div>
+        </section>
 
-<footer>
-  <a href="https://github.com/maks3592/sprint">Исходники на GitHub</a>
-  <p>Сделано с ❤️ и ☕. Вайбкодинг присутствует.</p>
-</footer>
+        <div class="marquee" aria-hidden="true">
+            <div class="marquee-track">
+                <span>60 м · 6,34 с</span><span>100 м · 9,58 с</span><span>150 м · 14,35 с</span><span>200 м · 19,19 с</span><span>44,72 км/ч</span><span>обмороки</span><span>дуэли</span>
+                <span>60 м · 6,34 с</span><span>100 м · 9,58 с</span><span>150 м · 14,35 с</span><span>200 м · 19,19 с</span><span>44,72 км/ч</span><span>обмороки</span><span>дуэли</span>
+            </div>
+        </div>
 
-<a class="sticky" href="https://github.com/maks3592/sprint/releases/latest/download/Sprint.apk">Скачать APK</a>
-<script src="site/js/main.js"></script>
+        <section id="records" class="section" aria-labelledby="records-title">
+            <div class="section-head">
+                <span class="section-index">002</span>
+                <h2 id="records-title" class="section-title reveal">Рекорды<br><span class="muted">живых людей</span></h2>
+                <p class="section-lead reveal">Четыре дистанции, и на каждой висит время, которое кто-то правда пробежал. Первые секунды падают за вечер. Последние десятые придётся выгрызать через перерождения.</p>
+            </div>
+
+            <p class="hint reveal">Тыкни на дистанцию, там у каждой своя история.</p>
+
+            <ol class="stations">
+                <li class="station reveal"><span class="st-num">01</span><span class="st-name">60 метров</span><span class="st-record">6,34 с</span><span class="st-meta">Кристиан Коулман, 2018</span><span class="st-rank">сразу</span><p class="st-fact">Рекорд поставлен в зале. Шестьдесят метров бегают зимой под крышей, а Коулман пробежал их со средней скоростью около 34 км/ч. В игре это самая короткая дистанция и первая, где можно почувствовать такт.</p></li>
+                <li class="station reveal"><span class="st-num">02</span><span class="st-name">100 метров</span><span class="st-record">9,58 с</span><span class="st-meta">Усейн Болт, Берлин, 2009</span><span class="st-rank">после 60 м</span><p class="st-fact">Болт бежал эту сотню примерно за 41 шаг. А в Пекине в 2008-м он начал праздновать за двадцать метров до финиша и всё равно выиграл. Берлинские 9,58 стоят уже много лет, и приблизиться к ним никто не смог.</p></li>
+                <li class="station reveal"><span class="st-num">03</span><span class="st-name">150 метров</span><span class="st-record">14,35 с</span><span class="st-meta">Усейн Болт, Манчестер, 2009</span><span class="st-rank">после 100 м</span><p class="st-fact">Самая странная дистанция в таблице. Её бегают редко, а рекорд Болт поставил на прямой городской улице в Манчестере, на временной дорожке. В игре она нужна, чтобы потренировать выносливость между сотней и двести.</p></li>
+                <li class="station reveal"><span class="st-num">04</span><span class="st-name">200 метров</span><span class="st-record">19,19 с</span><span class="st-meta">Усейн Болт, Берлин, 2009</span><span class="st-rank">после 150 м</span><p class="st-fact">Через четыре дня после своей сотни в Берлине Болт пробежал двести. Рекорд тоже его. В игре на этой дистанции бегуну нужно больше всего сил, и если запас пуст, он упадёт прямо на дорожке.</p></li>
+            </ol>
+
+            <p class="ranks reveal">Жизнь 1 → жизнь 2 → жизнь 3 → <strong>жизнь 4, и только тут рекорды мира реальны</strong></p>
+        </section>
+
+        <section id="screens" class="section section-screens" aria-labelledby="screens-title">
+            <div class="section-head">
+                <span class="section-index">003</span>
+                <h2 id="screens-title" class="section-title reveal">Как это<br><span class="muted">выглядит</span></h2>
+            </div>
+            <div class="screens">
+                <figure class="phone reveal">
+                    <img src="docs/screenshot-home.png" alt="Главный экран: бегун на старте, выбор дистанции, шкала сил" width="390" height="844" loading="lazy">
+                    <figcaption><span>01</span> Старт</figcaption>
+                </figure>
+                <figure class="phone reveal">
+                    <img src="docs/screenshot-race.png" alt="Забег: таймер, соперники, зелёное кольцо на кнопке" width="390" height="844" loading="lazy">
+                    <figcaption><span>02</span> Забег</figcaption>
+                </figure>
+                <figure class="phone reveal">
+                    <img src="docs/screenshot-train.png" alt="Тренировки: сила ног, скорость, выносливость" width="390" height="844" loading="lazy">
+                    <figcaption><span>03</span> Тренировки</figcaption>
+                </figure>
+                <figure class="phone reveal">
+                    <img src="docs/screenshot-duel.png" alt="Дуэль: код комнаты из четырёх цифр" width="390" height="844" loading="lazy">
+                    <figcaption><span>04</span> Дуэль</figcaption>
+                </figure>
+            </div>
+        </section>
+
+        <section id="idea" class="section" aria-labelledby="idea-title">
+            <div class="section-head">
+                <span class="section-index">004</span>
+                <h2 id="idea-title" class="section-title reveal">Зачем<br><span class="muted">это всё</span></h2>
+            </div>
+            <div class="idea">
+                <p class="idea-big reveal">Хотел игру, где важно не сколько раз тапнул, а как.</p>
+                <div class="idea-cols">
+                    <p class="reveal">Внизу ползёт метка, на кнопке бьётся зелёное кольцо. Попал в такт, скорость растёт. Опередил или опоздал, и бегун буксует. Звучит просто, пока не попробуешь не сбиться на сотом метре.</p>
+                    <p class="reveal">Потом выяснилось, что бегать на пределе нельзя. Дотащился до конца двухсот метров еле живым, и минуту реального времени силы не вернутся. Выйдешь раньше, и бегун рухнет на полпути. Дыхание в игре записано живым человеком: синтезатор звучал как хлыст.</p>
+                    <p class="reveal">Дальше появились дуэли, потому что бежать одному скучно. Игра писалась вместе с нейросетью, так что вайбкодинг тут есть, и да, я в курсе. До реального бега ей далеко, но я тащу её ближе с каждой версией.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="facts" class="section section-facts" aria-labelledby="facts-title">
+            <div class="section-head">
+                <span class="section-index">005</span>
+                <h2 id="facts-title" class="section-title reveal">Невероятно,<br><span class="muted">но факт</span></h2>
+                <p class="section-lead reveal">Пока собирал рекорды для игры, нарыл историй, которые не влезли в таблицу. Жми кнопку, они закончатся не скоро.</p>
+            </div>
+            <div class="fact reveal" aria-live="polite">
+                <span class="fact-count">01 <em>/ 09</em></span>
+                <h3 class="fact-title">Болт начал праздновать за двадцать метров до финиша.</h3>
+                <p class="fact-text">Пекин, 2008. Он уже вёл с большим отрывом, опустил руки и вовсе не бежал последние метры. Время всё равно получилось 9,69.</p>
+            </div>
+            <button class="btn btn-ghost js-next-fact reveal" type="button">Ещё факт</button>
+        </section>
+
+        <section id="calc" class="section" aria-labelledby="calc-title">
+            <div class="section-head">
+                <span class="section-index">006</span>
+                <h2 id="calc-title" class="section-title reveal">Прикинь,<br><span class="muted">где ты</span></h2>
+                <p class="section-lead reveal">Выбери дистанцию и введи своё время. Посчитаю среднюю скорость и сравню с рекордом. Попробуй ввести 9,58.</p>
+            </div>
+            <form class="calc reveal" onsubmit="return false">
+                <label class="field">
+                    <span>Дистанция</span>
+                    <select class="js-calc-dist">
+                        <option value="60">60 метров</option>
+                        <option value="100" selected>100 метров</option>
+                        <option value="150">150 метров</option>
+                        <option value="200">200 метров</option>
+                    </select>
+                </label>
+                <label class="field">
+                    <span>Время, секунд</span>
+                    <input class="js-calc-time" type="number" inputmode="decimal" min="0" step="0.01" value="14">
+                </label>
+                <div class="calc-out" aria-live="polite">
+                    <span class="calc-max js-calc-max">—</span>
+                    <span class="calc-label js-calc-label"></span>
+                    <p class="calc-verdict js-calc-verdict"></p>
+                </div>
+            </form>
+        </section>
+
+        <section id="progress" class="section" aria-labelledby="progress-title">
+            <div class="section-head">
+                <span class="section-index">007</span>
+                <h2 id="progress-title" class="section-title reveal">Как растёт<br><span class="muted">бегун</span></h2>
+            </div>
+            <div class="cards">
+                <article class="card reveal">
+                    <span class="card-num">01</span>
+                    <h3>Силы</h3>
+                    <p>Каждая дистанция съедает запас сил, а выносливость делает его шире. Прыжки и скакалка тоже тратят. Пусто, значит, минуту отдыхаешь в реальном времени.</p>
+                </article>
+                <article class="card reveal">
+                    <span class="card-num">02</span>
+                    <h3>Обмороки</h3>
+                    <p>Бежишь слишком медленно или вышел на старт с пустым баком, и бегун падает прямо на дорожке. Экран темнеет по краям, дрожит камера, слышно дыхание и сердце.</p>
+                </article>
+                <article class="card reveal">
+                    <span class="card-num">03</span>
+                    <h3>Ноги, скорость, выносливость</h3>
+                    <p>Монеты за забеги и прыжки уходят на три вещи. Сила ног даёт старт и прыжок, скорость поднимает потолок, выносливость держит максимум дольше.</p>
+                </article>
+                <article class="card reveal">
+                    <span class="card-num">04</span>
+                    <h3>Перерождения</h3>
+                    <p>Всё прокачал до потолка, переродился: потолок выше, монет за забег больше. Рекорды мира реально побить только на четвёртой жизни.</p>
+                </article>
+            </div>
+        </section>
+
+        <section id="duel" class="section section-friends" aria-labelledby="duel-title">
+            <div class="section-head">
+                <span class="section-index">008</span>
+                <h2 id="duel-title" class="section-title reveal">Кто быстрее,<br><span class="muted">ты или друг?</span></h2>
+                <p class="section-lead reveal">Дуэль живая: два телефона, одна дорожка, и вы видите соперника в реальном времени. Своего сервера у игры нет, связь идёт через публичные MQTT-брокеры.</p>
+            </div>
+            <ol class="steps">
+                <li class="reveal"><span>1</span>Нажми «Дуэль» и создай комнату, получишь четыре цифры</li>
+                <li class="reveal"><span>2</span>Друг вводит код у себя на телефоне</li>
+                <li class="reveal"><span>3</span>Старт, и вы бежите рядом. Кто быстрее, тот и прав</li>
+            </ol>
+            <p class="note reveal">Нужен интернет у обоих. Прогресс хранится на самом телефоне, регистрация не нужна.</p>
+        </section>
+
+        <section class="final" aria-labelledby="final-title">
+            <h2 id="final-title" class="final-title reveal">Скачать</h2>
+            <a class="btn btn-primary btn-lg js-download reveal" href="apk/Sprint.apk" download>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0-5-5m5 5 5-5M4 21h16"/></svg>
+                <span>APK для Android</span>
+            </a>
+            <p class="final-count reveal"><span class="js-count">—</span> <span class="js-count-label">скачиваний с сайта</span></p>
+            <ol class="install reveal">
+                <li>Скачай файл на телефон</li>
+                <li>Открой его</li>
+                <li>Разреши установку из неизвестных источников, если телефон спросит</li>
+            </ol>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p class="footer-love">Сделано с <span class="js-heart">❤️</span> и <span class="js-coffee">☕</span>. (вайбкодинг присутствует)</p>
+        <p class="footer-links">
+            <a href="https://github.com/maks3592/sprint" target="_blank" rel="noopener">GitHub</a> ·
+            <a href="https://github.com/maks3592/sprint/releases" target="_blank" rel="noopener">Releases</a> ·
+            Автор <a href="https://github.com/maks3592" target="_blank" rel="noopener">maks3592</a>
+        </p>
+        <p class="footer-small"><a href="#top">Вернуться наверх</a> · © 2026 maks3592</p>
+    </footer>
+
+    <div class="mobile-bar" aria-hidden="true">
+        <a class="btn btn-primary js-download" href="apk/Sprint.apk" download tabindex="-1">Скачать APK · <span class="js-size">4,1 МБ</span></a>
+    </div>
+
+    <div class="dl-panel" role="status" aria-live="polite" hidden>
+        <div class="dl-head">
+            <span class="dl-title">Скачиваем APK</span>
+            <button class="dl-close" type="button" aria-label="Закрыть">×</button>
+        </div>
+        <div class="dl-bar"><div class="dl-fill"></div></div>
+        <div class="dl-meta"><span class="dl-percent">0%</span><span class="dl-bytes">0 / 4,1 МБ</span></div>
+        <p class="dl-done">Готово! Откройте <b>Sprint.apk</b> в загрузках и разрешите установку, если телефон спросит.</p>
+        <p class="dl-error">Не получилось скачать здесь. <a class="dl-direct" href="https://github.com/maks3592/sprint/releases/latest/download/Sprint.apk" download>Скачать напрямую</a></p>
+    </div>
+
+    <div class="toast" role="status" aria-live="polite" hidden></div>
+
+    <script src="site/js/main.js?v=1" defer></script>
+    <script src="site/js/fun.js?v=1" defer></script>
 </body>
 </html>

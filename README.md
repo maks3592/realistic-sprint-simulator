@@ -81,7 +81,7 @@
 sprint/
 ├── www/              игра: index.html, style.css, game.js, breath.js
 ├── scripts/          prepare.js копирует three, mqtt и шрифты в www
-├── site/             сайт для скачивания
+├── index.html, site/ сайт для скачивания (Pages)
 ├── docs/             скриншоты
 └── .github/workflows сборка APK и публикация релиза
 ```
