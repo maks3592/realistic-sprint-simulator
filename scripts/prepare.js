@@ -10,6 +10,11 @@ fs.copyFileSync(
   path.join(www, 'three.min.js')
 );
 
+fs.copyFileSync(
+  path.join(__dirname, '..', 'node_modules', 'mqtt', 'dist', 'mqtt.min.js'),
+  path.join(www, 'mqtt.min.js')
+);
+
 const wanted = {
   'exo-2': [700, 800].flatMap(w => [`exo-2-cyrillic-${w}-normal.woff2`, `exo-2-latin-${w}-normal.woff2`]),
   manrope: [500, 600, 700].flatMap(w => [`manrope-cyrillic-${w}-normal.woff2`, `manrope-latin-${w}-normal.woff2`]),

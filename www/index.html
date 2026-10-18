@@ -35,9 +35,35 @@
         <button class="btn" id="toTrain" type="button"><span>Тренировки</span><em id="xpBadge">0 М</em></button>
         <button class="btn" id="toJump" type="button"><span>Прыжок с места</span><em id="jumpBadge">—</em></button>
         <button class="btn" id="toRope" type="button"><span>Скакалка</span><em id="ropeBadge">—</em></button>
+        <button class="btn wide" id="toDuel" type="button"><span>Дуэль онлайн</span><em>с другом</em></button>
       </div>
       <div class="label">Рекорды</div>
       <table class="rec" id="recTable"></table>
+    </div>
+  </section>
+
+  <section id="s-duel" class="screen" hidden>
+    <header class="bar">
+      <button class="back" id="duBack" type="button"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Назад</button>
+      <h2>Дуэль</h2>
+    </header>
+    <div class="grow"></div>
+    <div class="sheet">
+      <div id="duMenu">
+        <p class="hint">Один создаёт комнату, второй вводит её код. Бежите одновременно, каждый на своём телефоне, и видите друг друга на дорожке.</p>
+        <button class="btn primary" id="duCreate" type="button">СОЗДАТЬ КОМНАТУ</button>
+        <div class="du-join">
+          <input id="duCode" type="tel" inputmode="numeric" maxlength="4" placeholder="Код друга" autocomplete="off">
+          <button class="btn primary" id="duJoin" type="button">ВОЙТИ</button>
+        </div>
+        <p class="hint du-err" id="duErr"></p>
+      </div>
+      <div id="duWait" hidden>
+        <div class="label">Код комнаты</div>
+        <div class="du-code" id="duCodeBig">0000</div>
+        <p class="hint" id="duStatus"></p>
+        <button class="btn plain" id="duCancel" type="button">Отмена</button>
+      </div>
     </div>
   </section>
 
@@ -146,6 +172,7 @@
 
 
 <script src="three.min.js"></script>
+<script src="mqtt.min.js"></script>
 <script src="breath.js"></script>
 <script src="game.js"></script>
 </body>
