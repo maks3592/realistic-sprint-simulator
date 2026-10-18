@@ -5,6 +5,9 @@ on:
     branches: [main]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   apk:
     runs-on: ubuntu-latest
@@ -77,3 +80,12 @@ jobs:
         with:
           name: sprint-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
+
+      - name: Релиз с APK
+        if: github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cp android/app/build/outputs/apk/debug/app-debug.apk Sprint.apk
+          gh release delete latest --cleanup-tag --yes || true
+          gh release create latest Sprint.apk --title "Спринт" --notes "Свежая сборка из ветки main." --latest
