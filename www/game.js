@@ -267,7 +267,7 @@ setInterval(() => { if (mode === 'home') renderStam(); }, 500);
 
 let renderer = null;
 try {
-  renderer = new THREE.WebGLRenderer({ canvas: $('gl'), antialias: true });
+  renderer = new THREE.WebGLRenderer({ canvas: $('gl'), antialias: (window.devicePixelRatio || 1) < 2, powerPreference: 'high-performance' });
 } catch (e) {
   renderer = null;
 }
@@ -483,7 +483,6 @@ function fxUpdate(dt, nowS, target) {
   const gl = $('gl');
   const parts = [];
   if (P.grey > 0 && e > 0.2) parts.push('grayscale(' + clamp(e * P.grey * 0.9, 0, 0.95).toFixed(2) + ')');
-  if (P.blur > 0 && e > 0.3) parts.push('blur(' + (e * P.blur * 2.2).toFixed(1) + 'px)');
   gl.style.filter = parts.join(' ');
   if (e > 0.1) {
     const rot = Math.sin(nowS * 1.3) * 0.9 * e * P.wob;

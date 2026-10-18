@@ -32,6 +32,40 @@ jobs:
       - name: Только вертикальный режим
         run: sed -i 's/<activity /<activity android:screenOrientation="portrait" /' android/app/src/main/AndroidManifest.xml
 
+      - name: Максимальная частота кадров
+        run: |
+          mkdir -p android/app/src/main/java/com/maks3592/sprint
+          cat > android/app/src/main/java/com/maks3592/sprint/MainActivity.java <<'EOF'
+          package com.maks3592.sprint;
+
+          import android.os.Build;
+          import android.os.Bundle;
+          import android.view.Display;
+          import android.view.WindowManager;
+          import com.getcapacitor.BridgeActivity;
+
+          public class MainActivity extends BridgeActivity {
+              @Override
+              public void onCreate(Bundle savedInstanceState) {
+                  super.onCreate(savedInstanceState);
+                  if (Build.VERSION.SDK_INT >= 23) {
+                      Display display = getWindowManager().getDefaultDisplay();
+                      Display.Mode best = null;
+                      for (Display.Mode mode : display.getSupportedModes()) {
+                          if (best == null || mode.getRefreshRate() > best.getRefreshRate()) {
+                              best = mode;
+                          }
+                      }
+                      if (best != null) {
+                          WindowManager.LayoutParams params = getWindow().getAttributes();
+                          params.preferredDisplayModeId = best.getModeId();
+                          getWindow().setAttributes(params);
+                      }
+                  }
+              }
+          }
+          EOF
+
       - name: Синхронизация
         run: npx cap sync android
 
