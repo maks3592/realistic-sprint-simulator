@@ -9,9 +9,9 @@
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
 <div id="stage"><canvas id="gl"></canvas></div>
 <div id="fx"><div class="vig"></div><div class="noise"></div></div>
+<div id="blk"></div>
 
 <div id="ui">
   <section id="s-home" class="screen">
@@ -25,6 +25,7 @@
     <div class="grow"></div>
     <div class="card home-card">
       <div class="lifebar"><span id="lifeTxt"></span><b id="coinTxt"></b></div>
+      <div class="stam" id="stam"><span id="stamTxt"></span><i><b id="stamBar"></b></i></div>
       <div id="nogl" hidden>Не удалось включить 3D в этом браузере. Открой игру в Chrome или Safari.</div>
       <div class="label">Дистанция</div>
       <div class="dists" id="dists"></div>
@@ -143,6 +144,9 @@
   </section>
 </div>
 
+
 <script src="three.min.js"></script>
 <script src="breath.js"></script>
 <script src="game.js"></script>
+</body>
+</html>
