@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#0b1120">
+<title>Спринт</title>
+<link rel="stylesheet" href="fonts.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="stage"><canvas id="gl"></canvas></div>
+<div id="fx"><div class="vig"></div><div class="noise"></div></div>
+
+<div id="ui">
+  <section id="s-home" class="screen">
+    <header class="home-head">
+      <div class="brand">
+        <h1>СПРИНТ</h1>
+        <p>Ты только начал бегать. Впереди мировые рекорды.</p>
+      </div>
+      <div class="chips"><button class="chip" id="sndBtn" type="button">Звук: вкл</button><button class="chip" id="helpBtn" type="button">Как играть</button></div>
+    </header>
+    <div class="grow"></div>
+    <div class="card home-card">
+      <div class="lifebar"><span id="lifeTxt"></span><b id="coinTxt"></b></div>
+      <div id="nogl" hidden>Не удалось включить 3D в этом браузере. Открой игру в Chrome или Safari.</div>
+      <div class="label">Дистанция</div>
+      <div class="dists" id="dists"></div>
+      <p class="hint" id="distHint"></p>
+      <button class="cta" id="goBtn" type="button"><span>СТАРТ</span><b id="goDist">60 м</b></button>
+      <div class="duo">
+        <button class="btn" id="toTrain" type="button"><span>Тренировки</span><em id="xpBadge">0 М</em></button>
+        <button class="btn" id="toJump" type="button"><span>Прыжок с места</span><em id="jumpBadge">—</em></button>
+        <button class="btn" id="toRope" type="button"><span>Скакалка</span><em id="ropeBadge">—</em></button>
+      </div>
+      <div class="label">Рекорды</div>
+      <table class="rec" id="recTable"></table>
+    </div>
+  </section>
+
+  <section id="s-help" class="screen" hidden>
+    <header class="bar">
+      <button class="back" id="hpBack" type="button"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Меню</button>
+      <h2>Как играть</h2>
+    </header>
+    <div class="grow"></div>
+    <div class="card">
+      <div class="steps">
+        <div><em>1</em><span>Жди выстрел. Если нажать раньше, потеряешь 0,2 с.</span></div>
+        <div><em>2</em><span>Жми большую кнопку в такт зелёному кольцу. Метка внизу экрана должна стоять в зелёной зоне. Быстрее или медленнее скорость падает.</span></div>
+        <div><em>3</em><span>За забеги и прыжки получаешь монеты. На них качаются ноги, скорость и выносливость.</span></div>
+        <div><em>4</em><span>Когда всё прокачано до потолка, можно перерождаться: потолок растёт, монет идёт больше. Рекорды мира реально побить только после трёх перерождений.</span></div>
+      </div>
+      <button class="cta" id="hpGo" type="button"><span id="hpGoText">ПОНЯТНО</span></button>
+    </div>
+  </section>
+
+  <section id="s-train" class="screen" hidden>
+    <header class="bar">
+      <button class="back" id="trBack" type="button"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Меню</button>
+      <h2>Тренировки</h2>
+      <div class="xp"><span id="trXp">0</span> М</div>
+    </header>
+    <div class="scroll" id="trBody"></div>
+  </section>
+
+  <section id="s-race" class="screen" hidden>
+    <div class="hud-top">
+      <div class="clock"><span id="clock">0.00</span><small>с</small></div>
+      <div class="speed"><span id="speed">0.0</span><small>км/ч</small></div>
+    </div>
+    <div class="prog">
+      <div class="prog-track" id="pgTrack">
+        <i class="d-rv" id="pgR0"></i><i class="d-rv" id="pgR1"></i><i class="d-rv" id="pgR2"></i>
+        <i class="d-gh" id="pgG"></i><i class="d-me" id="pgMe"></i>
+      </div>
+      <div class="prog-meta"><span id="left">60 м до финиша</span><span id="gdelta"></span></div>
+    </div>
+    <div class="mid">
+      <div class="call" id="call"></div>
+      <div class="tip" id="tip"></div>
+    </div>
+    <div class="tempo">
+      <div class="tempo-bar"><div class="zone"></div><div class="mk" id="mk"></div></div>
+      <div class="tempo-labels"><span>медленно</span><span id="tempoHint">темп</span><span>быстро</span></div>
+    </div>
+    <div class="pads">
+      <button class="pad" id="pad" type="button"><i class="tg"></i><i class="ap" id="ap"></i><span>ЖМИ В ТАКТ</span></button>
+    </div>
+  </section>
+
+  <section id="s-result" class="screen" hidden>
+    <div class="sheet">
+      <div class="label" id="resKicker">Забег 60 м</div>
+      <h2 id="resTitle">1 место</h2>
+      <div class="res-time" id="resTimeWrap"><span id="resTime">9.84</span><small>с</small></div>
+      <div class="banners" id="resBanners"></div>
+      <dl class="rows" id="resRows"></dl>
+      <div class="btns">
+        <button class="btn primary" id="resAgain" type="button">ЕЩЁ РАЗ</button>
+        <button class="btn plain" id="resMenu" type="button">В меню</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="s-rope" class="screen" hidden>
+    <header class="bar">
+      <button class="back" id="rpBack" type="button"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Меню</button>
+      <h2>Скакалка</h2>
+    </header>
+    <div class="jm-info" id="rpInfo"></div>
+    <div class="grow"></div>
+    <div class="sheet" id="rpResult" hidden>
+      <div class="jm-big"><span id="rpBig">0</span><small>прыжков</small></div>
+      <div class="banners" id="rpBanners"></div>
+      <dl class="rows" id="rpRows"></dl>
+    </div>
+    <div class="ropebox" id="rpBox"><canvas id="rpCv"></canvas><div class="rp-hud"><span>Серия<b id="rpStreak">0</b></span><span>Прыжки<b id="rpReps">0</b></span><span>Жизни<b id="rpLives">3</b></span></div></div>
+    <p class="jm-help" id="rpHelp"></p>
+    <button class="cta" id="rpBtn" type="button"><span id="rpBtnText">НАЧАТЬ</span></button>
+  </section>
+
+  <section id="s-jump" class="screen" hidden>
+    <header class="bar">
+      <button class="back" id="jmBack" type="button"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Меню</button>
+      <h2>Прыжок с места</h2>
+    </header>
+    <div class="jm-info" id="jmInfo"></div>
+    <div class="grow"></div>
+    <div class="sheet" id="jmResult" hidden>
+      <div class="jm-big"><span id="jmDist">1.30</span><small>м</small></div>
+      <div class="banners" id="jmBanners"></div>
+      <dl class="rows" id="jmRows"></dl>
+    </div>
+    <div class="meter" id="meter" hidden>
+      <div class="mbar"><div class="mzone"></div><div class="mmk" id="mmk"></div></div>
+      <div class="mlabels"><span>слабо</span><span>сильно</span></div>
+    </div>
+    <p class="jm-help" id="jmHelp"></p>
+    <button class="cta" id="jmBtn" type="button"><span id="jmBtnText">ПРИСЕСТЬ</span></button>
+  </section>
+</div>
+
+<script src="three.min.js"></script>
+<script src="breath.js"></script>
+<script src="game.js"></script>

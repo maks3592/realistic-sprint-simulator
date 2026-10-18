@@ -1,0 +1,17 @@
+{
+  "name": "sprint",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "prepare-www": "node scripts/prepare.js"
+  },
+  "dependencies": {
+    "@capacitor/android": "^6.2.1",
+    "@capacitor/cli": "^6.2.2",
+    "@capacitor/core": "^6.2.1",
+    "@fontsource/exo-2": "^5.3.0",
+    "@fontsource/jetbrains-mono": "^5.1.0",
+    "@fontsource/manrope": "^5.1.0",
+    "three": "0.128.0"
+  }
+}

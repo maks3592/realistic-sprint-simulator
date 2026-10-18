@@ -1,0 +1,4 @@
+node_modules/
+android/
+www/three.min.js
+www/fonts/*.woff2
