@@ -267,7 +267,7 @@ setInterval(() => { if (mode === 'home') renderStam(); }, 500);
 
 let renderer = null;
 try {
-  renderer = new THREE.WebGLRenderer({ canvas: $('gl'), antialias: (window.devicePixelRatio || 1) < 2, powerPreference: 'high-performance' });
+  renderer = new THREE.WebGLRenderer({ canvas: $('gl'), antialias: true, powerPreference: 'high-performance' });
 } catch (e) {
   renderer = null;
 }
