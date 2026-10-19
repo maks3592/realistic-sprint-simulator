@@ -1195,10 +1195,12 @@ function duelMsg(buf) {
   let m;
   try { m = JSON.parse(buf.toString()); } catch (e) { return; }
   if (!m || m.id === DU.id) return;
-  const key = m.id + ':' + m.s;
-  if (DU.seenKeys.has(key)) return;
-  DU.seenKeys.add(key);
-  if (DU.seenKeys.size > 600) DU.seenKeys = new Set(Array.from(DU.seenKeys).slice(-200));
+  if (typeof m.s === 'number') {
+    const key = m.id + ':' + m.s;
+    if (DU.seenKeys.has(key)) return;
+    DU.seenKeys.add(key);
+    if (DU.seenKeys.size > 600) DU.seenKeys = new Set(Array.from(DU.seenKeys).slice(-200));
+  }
   if (m.id === DU.oppId) DU.pos.seen = performance.now();
   if (m.t === 'join' && DU.host && DU.state === 'wait') {
     DU.oppId = m.id;
@@ -1215,8 +1217,8 @@ function duelMsg(buf) {
     duelBegin();
   } else if (m.id === DU.oppId) {
     if (m.t === 'pos') {
-      if (m.s > DU.lastPosSeq) {
-        DU.lastPosSeq = m.s;
+      if (typeof m.s !== 'number' || m.s > DU.lastPosSeq) {
+        if (typeof m.s === 'number') DU.lastPosSeq = m.s;
         DU.pos = { x: m.x, v: m.v, tr: m.tr, seen: performance.now() };
       }
     } else if (m.t === 'fin') {
