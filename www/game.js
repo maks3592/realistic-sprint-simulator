@@ -1048,7 +1048,7 @@ const DU_BROKERS = window.SPRINT_BROKERS || ['wss://broker.hivemq.com:8884/mqtt'
 const DU_NAMES = ['hivemq', 'emqx', 'mosquitto', 'eclipse'];
 const DU_SILENCE_MS = 14000;
 const DU_OFFLINE_MS = 12000;
-const DU = { clients: [], id: '', code: '', host: false, dist: 60, oppId: null, state: 'idle', active: false, delay: 1.5, pos: { x: 0, v: 0, tr: -1, seen: 0 }, ox: 0, oPhase: 0, oStarted: false, myFin: undefined, oppFin: undefined, oppLeft: false, netLost: false, lastPub: 0, lastBeat: 0, seq: 0, seenKeys: new Set(), lastPosSeq: -1, offlineSince: 0, joinTimer: null, waitTimer: null, connectTimer: null };
+const DU = { clients: [], id: '', code: '', host: false, dist: 60, oppId: null, state: 'idle', active: false, delay: 1.5, pos: { x: 0, v: 0, tr: -1, seen: 0 }, ox: 0, oPhase: 0, oStarted: false, myFin: undefined, oppFin: undefined, oppLeft: false, netLost: false, lastPub: 0, lastBeat: 0, seq: 0, tx: 0, rx: 0, rxOpp: 0, seenKeys: new Set(), lastPosSeq: -1, offlineSince: 0, joinTimer: null, waitTimer: null, connectTimer: null };
 function duelStatus(t) {
   $('duStatus').textContent = t;
 }
@@ -1064,6 +1064,7 @@ function duelPub(o) {
   o.id = DU.id;
   o.s = ++DU.seq;
   const text = JSON.stringify(o);
+  DU.tx++;
   DU.clients.forEach(c => {
     if (!c.connected) return;
     try { c.publish(DU_TOPIC + DU.code, text, { qos: 0 }); } catch (e) {}
@@ -1094,6 +1095,9 @@ function duelConnect(onReady, onFail) {
   DU.seenKeys = new Set();
   DU.lastPosSeq = -1;
   DU.seq = 0;
+  DU.tx = 0;
+  DU.rx = 0;
+  DU.rxOpp = 0;
   let ready = false;
   DU.connectTimer = setTimeout(() => {
     if (!ready) {
@@ -1208,14 +1212,19 @@ function duelBegin() {
 function duelMsg(buf) {
   let m;
   try { m = JSON.parse(buf.toString()); } catch (e) { return; }
-  if (!m || m.id === DU.id) return;
+  if (!m) return;
+  DU.rx++;
+  if (m.id === DU.id) return;
   if (typeof m.s === 'number') {
     const key = m.id + ':' + m.s;
     if (DU.seenKeys.has(key)) return;
     DU.seenKeys.add(key);
     if (DU.seenKeys.size > 600) DU.seenKeys = new Set(Array.from(DU.seenKeys).slice(-200));
   }
-  if (m.id === DU.oppId) DU.pos.seen = performance.now();
+  if (m.id === DU.oppId) {
+    DU.pos.seen = performance.now();
+    DU.rxOpp++;
+  }
   if (m.t === 'join' && DU.host && DU.state === 'wait') {
     DU.oppId = m.id;
     DU.state = 'race';
@@ -1261,7 +1270,7 @@ function duelMoveOpp(tReal, dt) {
 }
 function duelTick(nowS, tReal) {
   const now = performance.now();
-  if (race.state === 'run' && tReal - DU.lastPub >= 0.12) {
+  if (race.state === 'run' && tReal - DU.lastPub >= 0.2) {
     DU.lastPub = tReal;
     duelPub({ t: 'pos', x: sprinter.x, v: sprinter.v, tr: tReal });
   } else if (now - DU.lastBeat > 1000) {
@@ -1274,7 +1283,7 @@ function duelTick(nowS, tReal) {
     const silent = Math.floor((now - DU.pos.seen) / 1000);
     el.hidden = false;
     el.className = 'du-net' + (silent >= 4 || !duelOnline() ? ' bad' : '');
-    el.textContent = duelNetText() + (silent >= 4 ? ' · нет сигнала ' + silent + ' с' : ' · соперник на связи');
+    el.textContent = duelNetText() + ' · ↑' + DU.tx + ' ↓' + DU.rx + ' от соперника ' + DU.rxOpp + (silent >= 4 ? ' · нет сигнала ' + silent + ' с' : '');
   }
   if (duelOnline()) DU.offlineSince = 0;
   else if (!DU.offlineSince) DU.offlineSince = now;
