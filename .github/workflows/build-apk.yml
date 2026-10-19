@@ -1,4 +1,4 @@
-name: Сборка APK
+name: Build APK
 
 on:
   push:
@@ -33,6 +33,11 @@ jobs:
 
       - name: Android-проект
         run: npx cap add android
+
+      - name: Иконка приложения
+        run: |
+          rm -rf android/app/src/main/res/mipmap-anydpi-v26
+          cp -r android-icons/* android/app/src/main/res/
 
       - name: Только вертикальный режим
         run: sed -i 's/<activity /<activity android:screenOrientation="portrait" /' android/app/src/main/AndroidManifest.xml
@@ -88,9 +93,9 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          cp android/app/build/outputs/apk/debug/app-debug.apk Sprint.apk
+          cp android/app/build/outputs/apk/debug/app-debug.apk RealisticSprintSimulator.apk
           gh release delete latest --cleanup-tag --yes || true
-          gh release create latest Sprint.apk --title "Спринт" --notes "Свежая сборка из ветки main." --latest
+          gh release create latest RealisticSprintSimulator.apk --title "Realistic Sprint Simulator" --notes "Свежая сборка из ветки main." --latest
 
   site:
     needs: apk
@@ -112,7 +117,7 @@ jobs:
         run: |
           mkdir -p _site/apk
           cp -r index.html site docs _site/
-          cp apk-in/app-debug.apk _site/apk/Sprint.apk
+          cp apk-in/app-debug.apk _site/apk/RealisticSprintSimulator.apk
           touch _site/.nojekyll
 
       - uses: actions/upload-pages-artifact@v3

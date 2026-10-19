@@ -106,12 +106,12 @@ a { color: inherit; }
     align-items: center;
     gap: 12px;
     text-decoration: none;
-    font: 700 13px/1 var(--display);
-    letter-spacing: 0.12em;
+    font: 700 12px/1 var(--display);
+    letter-spacing: 0.1em;
     text-transform: uppercase;
 }
 
-.logo svg { width: 34px; height: 20px; fill: var(--fg); }
+.logo img { width: 34px; height: 34px; border-radius: 8px; }
 
 .nav-links { display: none; gap: 36px; }
 .nav-links a {

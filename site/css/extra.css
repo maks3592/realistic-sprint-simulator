@@ -195,7 +195,7 @@
     to { transform: translateY(115vh) rotate(var(--r)); }
 }
 
-.logo.spin svg { animation: spin 0.9s var(--ease); }
+.logo.spin img { animation: spin 0.9s var(--ease); }
 
 @keyframes spin {
     to { transform: rotate(360deg); }

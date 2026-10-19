@@ -2,15 +2,15 @@
     'use strict';
 
     var APK = {
-        url: 'apk/Sprint.apk',
-        fallback: 'https://github.com/maks3592/sprint/releases/latest/download/Sprint.apk',
-        name: 'Sprint.apk',
+        url: 'apk/RealisticSprintSimulator.apk',
+        fallback: 'https://github.com/maks3592/realistic-sprint-simulator/releases/latest/download/RealisticSprintSimulator.apk',
+        name: 'RealisticSprintSimulator.apk',
         size: 4261728,
         type: 'application/vnd.android.package-archive',
     };
 
     var STATS_API = 'https://abacus.jasoncameron.dev';
-    var STATS_NS = 'maks3592-sprint';
+    var STATS_NS = 'maks3592-realistic-sprint-simulator';
 
     function plural(n) {
         var m10 = n % 10, m100 = n % 100;

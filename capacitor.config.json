@@ -1,6 +1,6 @@
 {
   "appId": "com.maks3592.sprint",
-  "appName": "Спринт",
+  "appName": "Realistic Sprint Simulator",
   "webDir": "www",
   "android": {
     "backgroundColor": "#0b1120"

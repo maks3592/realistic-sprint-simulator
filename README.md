@@ -1,8 +1,8 @@
 <div align="center">
 
-# 🏃 СПРИНТ
+<img src="docs/brand/logo.png" alt="Realistic Sprint Simulator" width="640">
 
-**Тыкаешь в такт, бежишь быстрее. Сбился с ритма, и ноги уже не те.**
+**Realistic Sprint Simulator.** Тыкаешь в такт, бежишь быстрее. Сбился с ритма, и ноги уже не те.
 
 Мобильная игра про бег на 60, 100, 150 и 200 метров. Одна кнопка, настоящая усталость, обмороки и дуэли с друзьями по коду.
 
@@ -27,7 +27,7 @@
 
 ## 📲 Скачать
 
-1. Открой на телефоне страницу [Releases](../../releases/latest) и скачай `Sprint.apk`
+1. Открой на телефоне страницу [Releases](../../releases/latest) и скачай `RealisticSprintSimulator.apk`
 2. Разреши установку из этого источника, когда Android спросит
 3. Запускай и беги
 
@@ -78,11 +78,12 @@
 | Шрифты | Exo 2, Manrope, JetBrains Mono, всё локально |
 
 ```
-sprint/
+realistic-sprint-simulator/
+├── android-icons/    иконки приложения
 ├── www/              игра: index.html, style.css, game.js, breath.js
 ├── scripts/          prepare.js копирует three, mqtt и шрифты в www
 ├── index.html, site/ сайт для скачивания (Pages)
-├── docs/             скриншоты
+├── docs/             скриншоты и бренд (логотип, иконка)
 └── .github/workflows сборка APK и публикация релиза
 ```
 

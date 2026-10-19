@@ -269,7 +269,7 @@
 
     function greet() {
         if (!window.console || !console.log) return;
-        console.log('%cСПРИНТ', 'font:900 18px/1.4 system-ui;letter-spacing:.1em');
+        console.log('%cREALISTIC SPRINT SIMULATOR', 'font:900 18px/1.4 system-ui;letter-spacing:.1em');
         console.log('Привет, разработчик. Исходники на гитхабе.');
         console.log('Подсказка: ↑ ↑ ↓ ↓ ← → ← → B A');
     }

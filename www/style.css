@@ -70,7 +70,8 @@ h1, h2, p { margin: 0; }
   gap: 12px;
 }
 .home-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
-.brand h1 { font: 700 clamp(44px, 14vw, 66px)/.9 var(--f-display); letter-spacing: .02em; text-shadow: 0 2px 18px rgba(0,0,0,.55); }
+.brand h1 { font: 800 clamp(30px, 9.4vw, 44px)/.92 var(--f-display); letter-spacing: .01em; text-shadow: 0 2px 18px rgba(0,0,0,.55); }
+.brand h1 span { display: block; margin-bottom: 6px; font-size: .42em; letter-spacing: .46em; color: #ff5a36; }
 .brand h1::after { content: ""; display: block; width: 64px; height: 6px; margin-top: 8px; border-radius: 3px; background: var(--tartan); }
 .brand p { margin-top: 8px; max-width: 24ch; color: var(--ink); font-size: 15px; text-shadow: 0 1px 10px rgba(0,0,0,.7); }
 .chip { padding: 7px 12px; border-radius: 99px; border: 1.5px solid var(--line); background: rgba(14,21,38,.75); font: 600 13px var(--f-body); color: var(--dim); }
