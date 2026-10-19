@@ -27,7 +27,12 @@
 
     function stat(action) {
         return fetch(STATS_API + '/' + action + '/' + STATS_NS + '/downloads')
-            .then(function (r) { return r.json(); })
+            .then(function (r) {
+                if (r.status === 404 && action === 'get') {
+                    return fetch(STATS_API + '/create/' + STATS_NS + '/downloads?initializer=0').then(function () { return { value: 0 }; });
+                }
+                return r.json();
+            })
             .then(function (d) { showCount(d.value); })
             .catch(function () {
                 document.querySelectorAll('.js-count').forEach(function (el) { el.textContent = ''; });
