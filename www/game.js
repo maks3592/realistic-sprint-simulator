@@ -445,6 +445,7 @@ function fxStopRing() {
   FX.ring = null;
   FX.ringGain = null;
 }
+const fxCache = {};
 function fxReset() {
   $('blk').style.opacity = '0';
   FX.e = 0;
@@ -456,6 +457,7 @@ function fxReset() {
   fx.style.opacity = '0';
   $('gl').style.transform = '';
   $('gl').style.filter = '';
+  Object.keys(fxCache).forEach(k => { fxCache[k] = -1; });
   fxStopRing();
   fxBreathStop();
 }
@@ -475,23 +477,43 @@ function fxUpdate(dt, nowS, target) {
   else if (FX.bsrc) fxBreathStop();
   if (e > 0.5 || FX.ring) fxRing(e);
   const fx = $('fx');
-  fx.style.setProperty('--e', clamp(e * P.vig, 0, 1).toFixed(3));
-  fx.style.setProperty('--n', clamp(e * P.noise, 0, 1.2).toFixed(3));
-  fx.style.setProperty('--pu', FX.pu.toFixed(2));
-  fx.style.setProperty('--fl', FX.fl.toFixed(2));
+  fxApply(fx, 'vig', clamp(e * P.vig * 1.15 + FX.fl * 0.25, 0, 1));
+  fxApply(fx, 'vig2', clamp(FX.pu * 0.5 * e + FX.fl * 0.5, 0, 1));
+  fxApply(fx, 'noise', clamp(e * P.noise * 0.45, 0, 0.6));
+  fxApply(fx, 'grey', P.grey > 0 && e > 0.2 ? clamp(e * P.grey * 0.5, 0, 0.6) : 0);
   fx.style.opacity = e > 0.03 ? '1' : '0';
   const gl = $('gl');
-  const parts = [];
-  if (P.grey > 0 && e > 0.2) parts.push('grayscale(' + clamp(e * P.grey * 0.9, 0, 0.95).toFixed(2) + ')');
-  gl.style.filter = parts.join(' ');
   if (e > 0.1) {
     const rot = Math.sin(nowS * 1.3) * 0.9 * e * P.wob;
     const sc = 1 + 0.014 * e * FX.pu + (P.wob > 0 ? 0.03 * e : 0);
-    gl.style.transform = 'rotate(' + rot.toFixed(2) + 'deg) scale(' + sc.toFixed(4) + ')';
-  } else {
+    gl.style.transform = 'rotate(' + rot.toFixed(2) + 'deg) scale(' + sc.toFixed(3) + ')';
+  } else if (gl.style.transform) {
     gl.style.transform = '';
   }
 }
+function fxApply(root, cls, v) {
+  const k = Math.round(v * 100);
+  if (fxCache[cls] === k) return;
+  fxCache[cls] = k;
+  const el = root.querySelector('.' + cls);
+  if (el) el.style.opacity = (k / 100).toString();
+}
+
+(function () {
+  const el = document.querySelector('#fx .noise');
+  if (!el) return;
+  const c = document.createElement('canvas');
+  c.width = c.height = 128;
+  const g = c.getContext('2d');
+  const img = g.createImageData(128, 128);
+  for (let i = 0; i < img.data.length; i += 4) {
+    const v = Math.random() < 0.5 ? 255 : 0;
+    img.data[i] = img.data[i + 1] = img.data[i + 2] = v;
+    img.data[i + 3] = Math.random() * 150;
+  }
+  g.putImageData(img, 0, 0);
+  el.style.backgroundImage = 'url(' + c.toDataURL() + ')';
+})();
 
 let scene, camera, worldTrack, worldJump, actors, maxAniso = 1;
 const cam = { pos: null, tgt: null, dPos: null, dTgt: null, k: 6 };
@@ -1416,7 +1438,7 @@ function raceTick(dt, nowS) {
   if (race.state === 'faint') fxTarget = 1;
   fxUpdate(dt, nowS, fxTarget);
   if (live) {
-    race.acc = Math.min(race.acc + dt, 0.1);
+    race.acc = Math.min(race.acc + dt, 0.25);
     while (race.acc >= STEP) {
       sprinter.step(STEP, nowS);
       race.acc -= STEP;
@@ -1836,7 +1858,7 @@ function jumpTick(dt) {
 function tick(ms) {
   requestAnimationFrame(tick);
   if (!renderer) return;
-  const dt = Math.min(0.1, (ms - tick.last) / 1000);
+  const dt = Math.min(0.25, (ms - tick.last) / 1000);
   tick.last = ms;
   const nowS = performance.now() / 1000;
   if (mode === 'race') raceTick(dt, nowS);
