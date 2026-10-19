@@ -6,7 +6,7 @@
 
 ### Жмёшь в такт, бежишь быстрее. Сбился с ритма, и ноги уже не те.
 
-Мобильная игра про бег на 60, 100, 150 и 200 метров. Одна кнопка, настоящая усталость, обмороки и дуэли с друзьями по коду.
+Мобильная игра про бег на 60, 100, 150 и 200 метров. Одна кнопка, настоящая усталость и обмороки.
 
 [![Скачать на сайте](https://img.shields.io/badge/%E2%AC%87%20%D0%A1%D0%BA%D0%B0%D1%87%D0%B0%D1%82%D1%8C-%D0%BD%D0%B0%20%D1%81%D0%B0%D0%B9%D1%82%D0%B5-ff5a36?style=for-the-badge)](https://maks3592.github.io/realistic-sprint-simulator/)
 [![Скачиваний с сайта](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fabacus.jasoncameron.dev%2Fget%2Fmaks3592-realistic-sprint-simulator%2Fdownloads&query=%24.value&label=%D1%81%D0%BA%D0%B0%D1%87%D0%B8%D0%B2%D0%B0%D0%BD%D0%B8%D0%B9%20%D1%81%20%D1%81%D0%B0%D0%B9%D1%82%D0%B0&color=ff5a36&style=for-the-badge)](https://maks3592.github.io/realistic-sprint-simulator/#download)
@@ -17,11 +17,10 @@
 [![Android](https://img.shields.io/badge/Android-7.0%2B-3DDC84?logo=android&logoColor=white)](https://maks3592.github.io/realistic-sprint-simulator/#download)
 [![Three.js](https://img.shields.io/badge/Three.js-r128-000000?logo=three.js&logoColor=white)](https://threejs.org/)
 [![Capacitor](https://img.shields.io/badge/Capacitor-6-119EFF?logo=capacitor&logoColor=white)](https://capacitorjs.com/)
-[![MQTT](https://img.shields.io/badge/%D0%B4%D1%83%D1%8D%D0%BB%D0%B8-MQTT-660066?logo=mqtt&logoColor=white)](https://mqtt.org/)
 
-[Скачать](#-скачать) · [Как играть](#-как-играть) · [Усталость](#-усталость) · [Дуэли](#-дуэли) · [Рекорды](#-рекорды) · [Как устроено](#-как-устроено) · [Сборка](#-собрать-самому)
+[Скачать](#-скачать) · [Как играть](#-как-играть) · [Усталость](#-усталость) · [Рекорды](#-рекорды) · [Как устроено](#-как-устроено) · [Сборка](#-собрать-самому)
 
-<img src="docs/screenshot-home.png" width="22%"> <img src="docs/screenshot-race.png" width="22%"> <img src="docs/screenshot-train.png" width="22%"> <img src="docs/screenshot-duel.png" width="22%">
+<img src="docs/screenshot-home.png" width="30%"> <img src="docs/screenshot-race.png" width="30%"> <img src="docs/screenshot-train.png" width="30%">
 
 </div>
 
@@ -65,7 +64,6 @@
 | 🏁 Забег | 60, 100, 150 и 200 м. Дальние дистанции открываются быстрыми забегами |
 | 🦵 Прыжок с места | Прокачивает ноги и приносит монеты |
 | 🪢 Скакалка | Тапаешь в ритм, держишь серию |
-| 🤝 Дуэль | Бег против живого друга |
 
 ## 😮‍💨 Усталость
 
@@ -79,12 +77,6 @@
 | Обморок | Если бежишь слишком медленно или вышел с пустым баком, бегун падает |
 | Экран | Чем сильнее усталость, тем темнее края, краснее вуаль и сильнее тряска камеры |
 | Звук | Тяжёлое дыхание и стук сердца. Дыхание собрано из настоящей записи: нашёл исходник и сделал звук на его основе |
-
-## 🤝 Дуэли
-
-Бежишь с другом, у каждого свой телефон. Один создаёт комнату и получает четыре цифры, второй вводит их. Оба видят соперника на дорожке в реальном времени.
-
-Своего сервера у игры нет. Связь идёт через публичные MQTT-брокеры по WebSocket, поэтому ничего поднимать не нужно, нужен только интернет.
 
 ## 🏆 Рекорды
 
@@ -105,7 +97,6 @@
 |---|---|
 | 3D стадион и бегун | Three.js r128 |
 | Игра | один `game.js`, без фреймворков |
-| Дуэли | MQTT.js |
 | Обёртка под Android | Capacitor 6 |
 | Сборка APK | GitHub Actions, JDK 17, Gradle |
 | Сайт | статика на GitHub Pages, деплой из того же Actions |
@@ -115,7 +106,7 @@
 realistic-sprint-simulator/
 ├── www/               игра: index.html, style.css, game.js, breath.js
 ├── android-icons/     иконки приложения
-├── scripts/           prepare.js копирует three, mqtt и шрифты в www
+├── scripts/           prepare.js копирует three и шрифты в www
 ├── index.html, site/  сайт со скачиванием
 ├── docs/              скриншоты и бренд (логотип, иконка)
 └── .github/workflows/ сборка APK, релиз и деплой сайта

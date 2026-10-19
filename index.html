@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <title>Realistic Sprint Simulator: скачать APK</title>
-    <meta name="description" content="Мобильная игра про бег. Жми в такт, не выдохнись, обгоняй друзей в дуэлях и добирайся до рекордов Болта. Бесплатно, Android.">
+    <meta name="description" content="Мобильная игра про бег. Жми в такт, не выдохнись и добирайся до рекордов Болта. Бесплатно, Android.">
     <meta name="theme-color" content="#0a0a0a">
     <meta property="og:title" content="Realistic Sprint Simulator">
     <meta property="og:description" content="Одна кнопка, настоящая усталость и рекорды Болта в конце пути. Бесплатно, Android.">
@@ -31,7 +31,6 @@
             <a href="#idea">Идея</a>
             <a href="#facts">Факты</a>
             <a href="#calc">Прикинь</a>
-            <a href="#duel">Дуэли</a>
         </nav>
         <a class="btn btn-ghost btn-sm js-download" href="apk/RealisticSprintSimulator.apk" download>Скачать</a>
     </header>
@@ -65,7 +64,7 @@
             </div>
 
             <div class="hero-bottom" aria-hidden="true">
-                <span class="js-pager">001 <em>/ 008</em></span>
+                <span class="js-pager">001 <em>/ 007</em></span>
                 <a href="#records" class="scroll-cue">Листайте <span class="arrow">↓</span></a>
                 <span class="hero-bottom-right">Three.js · Capacitor</span>
             </div>
@@ -73,8 +72,8 @@
 
         <div class="marquee" aria-hidden="true">
             <div class="marquee-track">
-                <span>60 м · 6,34 с</span><span>100 м · 9,58 с</span><span>150 м · 14,35 с</span><span>200 м · 19,19 с</span><span>44,72 км/ч</span><span>обмороки</span><span>дуэли</span>
-                <span>60 м · 6,34 с</span><span>100 м · 9,58 с</span><span>150 м · 14,35 с</span><span>200 м · 19,19 с</span><span>44,72 км/ч</span><span>обмороки</span><span>дуэли</span>
+                <span>60 м · 6,34 с</span><span>100 м · 9,58 с</span><span>150 м · 14,35 с</span><span>200 м · 19,19 с</span><span>44,72 км/ч</span><span>обмороки</span>
+                <span>60 м · 6,34 с</span><span>100 м · 9,58 с</span><span>150 м · 14,35 с</span><span>200 м · 19,19 с</span><span>44,72 км/ч</span><span>обмороки</span>
             </div>
         </div>
 
@@ -115,10 +114,6 @@
                     <img src="docs/screenshot-train.png" alt="Тренировки: сила ног, скорость, выносливость" width="390" height="844" loading="lazy">
                     <figcaption><span>03</span> Тренировки</figcaption>
                 </figure>
-                <figure class="phone reveal">
-                    <img src="docs/screenshot-duel.png" alt="Дуэль: код комнаты из четырёх цифр" width="390" height="844" loading="lazy">
-                    <figcaption><span>04</span> Дуэль</figcaption>
-                </figure>
             </div>
         </section>
 
@@ -132,7 +127,7 @@
                 <div class="idea-cols">
                     <p class="reveal">Внизу ползёт метка, на кнопке бьётся зелёное кольцо. Попал в такт, скорость растёт. Опередил или опоздал, и бегун буксует. Звучит просто, пока не попробуешь не сбиться на сотом метре.</p>
                     <p class="reveal">Потом выяснилось, что бегать на пределе нельзя. Дотащился до конца двухсот метров еле живым, и минуту реального времени силы не вернутся. Выйдешь раньше, и бегун рухнет на полпути. Дыхание собрано из настоящей записи: нашёл исходник и сделал звук на его основе.</p>
-                    <p class="reveal">Дальше появились дуэли, потому что бежать одному скучно. Игра писалась вместе с нейросетью, так что вайбкодинг тут есть, и да, я в курсе. До реального бега ей далеко, но я тащу её ближе с каждой версией.</p>
+                    <p class="reveal">Игра писалась вместе с нейросетью, так что вайбкодинг тут есть, и да, я в курсе. До реального бега ей далеко, но я тащу её ближе с каждой версией.</p>
                 </div>
             </div>
         </section>
@@ -206,20 +201,6 @@
                     <p>Всё прокачал до потолка, переродился: потолок выше, монет за забег больше. Рекорды мира реально побить только на четвёртой жизни.</p>
                 </article>
             </div>
-        </section>
-
-        <section id="duel" class="section section-friends" aria-labelledby="duel-title">
-            <div class="section-head">
-                <span class="section-index">008</span>
-                <h2 id="duel-title" class="section-title reveal">Кто быстрее,<br><span class="muted">ты или друг?</span></h2>
-                <p class="section-lead reveal">Дуэль живая: два телефона, одна дорожка, и вы видите соперника в реальном времени. Своего сервера у игры нет, связь идёт через публичные MQTT-брокеры.</p>
-            </div>
-            <ol class="steps">
-                <li class="reveal"><span>1</span>Нажми «Дуэль» и создай комнату, получишь четыре цифры</li>
-                <li class="reveal"><span>2</span>Друг вводит код у себя на телефоне</li>
-                <li class="reveal"><span>3</span>Старт, и вы бежите рядом. Кто быстрее, тот и прав</li>
-            </ol>
-            <p class="note reveal">Нужен интернет у обоих. Прогресс хранится на самом телефоне, регистрация не нужна.</p>
         </section>
 
         <section id="download" class="final" aria-labelledby="final-title">

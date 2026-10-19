@@ -853,7 +853,7 @@ function homeCamTarget() {
   cam.dTgt.set(x - 0.1, -0.2, -0.3);
 }
 
-const screens = ['home', 'train', 'race', 'result', 'jump', 'help', 'rope', 'duel'];
+const screens = ['home', 'train', 'race', 'result', 'jump', 'help', 'rope'];
 function show(n) {
   screens.forEach(s => { $('s-' + s).hidden = (s !== n); });
 }
@@ -894,7 +894,6 @@ function renderHome() {
   const nextLocked = DISTS.find(d => save.unlocked.indexOf(d) < 0);
   $('distHint').textContent = save.runs === 0 ? 'Начни с 60 м. Быстрые забеги открывают новые дистанции.' : (nextLocked ? qualHint(nextLocked) : '');
   $('goDist').textContent = selDist + ' м';
-  $('toDuel').hidden = typeof mqtt === 'undefined';
   renderStam();
   $('lifeTxt').textContent = (save.legend ? 'Легенда спринта' : RANKS[save.life]) + ' · жизнь ' + (save.life + 1) + ' из 4';
   $('coinTxt').textContent = save.coins + ' М';
@@ -1043,307 +1042,10 @@ function rivalLevels(avg, mult) {
   const pick = () => clamp(Math.round(base + (Math.random() * 2 - 1)), 0, MAXL);
   return { power: pick(), speed: pick(), endur: pick() };
 }
-const DU_TOPIC = 'sprint-duel-v1/';
-const DU_BROKERS = window.SPRINT_BROKERS || ['wss://broker.hivemq.com:8884/mqtt', 'wss://broker.emqx.io:8084/mqtt', 'wss://test.mosquitto.org:8081/mqtt', 'wss://mqtt.eclipseprojects.io:443/mqtt'];
-const DU_NAMES = ['hivemq', 'emqx', 'mosquitto', 'eclipse'];
-const DU_SILENCE_MS = 14000;
-const DU_OFFLINE_MS = 12000;
-const DU = { clients: [], id: '', code: '', host: false, dist: 60, oppId: null, state: 'idle', active: false, delay: 1.5, pos: { x: 0, v: 0, tr: -1, seen: 0 }, ox: 0, oPhase: 0, oStarted: false, myFin: undefined, oppFin: undefined, oppLeft: false, netLost: false, lastPub: 0, lastBeat: 0, seq: 0, tx: 0, rx: 0, rxOpp: 0, seenKeys: new Set(), lastPosSeq: -1, offlineSince: 0, joinTimer: null, waitTimer: null, connectTimer: null };
-function duelStatus(t) {
-  $('duStatus').textContent = t;
-}
-function duelNetText() {
-  const total = DU.clients.length;
-  const on = DU.clients.filter(c => c.connected).length;
-  return DU.clients.map((c, i) => (c.connected ? '✓' : '✗') + (DU_NAMES[i] || i)).join(' ') + ' (' + on + '/' + total + ')';
-}
-function duelOnline() {
-  return DU.clients.some(c => c.connected);
-}
-function duelPub(o) {
-  o.id = DU.id;
-  o.s = ++DU.seq;
-  const text = JSON.stringify(o);
-  DU.tx++;
-  DU.clients.forEach(c => {
-    if (!c.connected) return;
-    try { c.publish(DU_TOPIC + DU.code, text, { qos: 0 }); } catch (e) {}
-  });
-}
-function duelClose() {
-  clearInterval(DU.joinTimer);
-  clearTimeout(DU.waitTimer);
-  clearTimeout(DU.connectTimer);
-  const list = DU.clients;
-  DU.clients = [];
-  list.forEach(c => {
-    try { c.end(true); } catch (e) {}
-  });
-}
-function duelLeave() {
-  if (DU.clients.length) duelPub({ t: 'leave' });
-  duelClose();
-  DU.active = false;
-  DU.state = 'idle';
-}
-function duelBrokerStatus() {
-  const el = $('duBrokers');
-  if (el) el.textContent = 'Серверы: ' + duelNetText();
-}
-function duelConnect(onReady, onFail) {
-  duelClose();
-  DU.seenKeys = new Set();
-  DU.lastPosSeq = -1;
-  DU.seq = 0;
-  DU.tx = 0;
-  DU.rx = 0;
-  DU.rxOpp = 0;
-  let ready = false;
-  DU.connectTimer = setTimeout(() => {
-    if (!ready) {
-      duelClose();
-      onFail();
-    }
-  }, 12000);
-  DU_BROKERS.forEach(url => {
-    let c;
-    try {
-      c = mqtt.connect(url, { clientId: 'sp' + Math.random().toString(16).slice(2, 10), connectTimeout: 8000, reconnectPeriod: 2000, keepalive: 20, clean: true });
-    } catch (e) {
-      return;
-    }
-    DU.clients.push(c);
-    c.on('error', () => {});
-    c.on('close', () => { if (DU.state === 'connecting' || DU.state === 'wait' || DU.state === 'joining') duelBrokerStatus(); });
-    c.on('connect', () => {
-      if (DU.state === 'connecting' || DU.state === 'wait' || DU.state === 'joining') duelBrokerStatus();
-      c.subscribe(DU_TOPIC + DU.code, { qos: 0 }, err => {
-        if (err || ready) return;
-        ready = true;
-        clearTimeout(DU.connectTimer);
-        onReady();
-      });
-    });
-    c.on('message', (tp, buf) => duelMsg(buf));
-  });
-  duelBrokerStatus();
-  if (!DU.clients.length) {
-    clearTimeout(DU.connectTimer);
-    onFail();
-  }
-}
-function duelShow(wait) {
-  $('duMenu').hidden = wait;
-  $('duWait').hidden = !wait;
-}
-function duelEnter() {
-  audio();
-  DU.id = 'p' + Math.random().toString(16).slice(2, 10);
-  duelShow(false);
-  $('duErr').textContent = '';
-  show('duel');
-}
-function duelCreate() {
-  DU.host = true;
-  DU.code = String(1000 + Math.floor(Math.random() * 9000));
-  DU.dist = selDist;
-  DU.state = 'connecting';
-  $('duCodeBig').textContent = DU.code;
-  duelShow(true);
-  duelStatus('Подключаюсь к серверу…');
-  duelConnect(() => {
-    DU.state = 'wait';
-    duelStatus('Ждём соперника. Дистанция ' + DU.dist + ' м. Продиктуй другу код.');
-  }, () => {
-    DU.state = 'idle';
-    duelStatus('Серверы недоступны. Проверь интернет, а если он есть, включи VPN.');
-  });
-}
-function duelJoin() {
-  const code = $('duCode').value.replace(/\D/g, '').slice(0, 4);
-  if (code.length !== 4) {
-    $('duErr').textContent = 'Введи 4 цифры кода';
-    return;
-  }
-  DU.host = false;
-  DU.code = code;
-  DU.state = 'connecting';
-  $('duCodeBig').textContent = code;
-  duelShow(true);
-  duelStatus('Подключаюсь к серверу…');
-  duelConnect(() => {
-    DU.state = 'joining';
-    duelStatus('Ищу комнату…');
-    let n = 0;
-    duelPub({ t: 'join' });
-    DU.joinTimer = setInterval(() => {
-      if (DU.state !== 'joining') {
-        clearInterval(DU.joinTimer);
-        return;
-      }
-      if (++n > 12) {
-        clearInterval(DU.joinTimer);
-        DU.state = 'idle';
-        duelStatus('Комната не найдена. Проверь код и что друг уже её создал.');
-        return;
-      }
-      duelPub({ t: 'join' });
-    }, 1500);
-  }, () => {
-    DU.state = 'idle';
-    duelStatus('Серверы недоступны. Проверь интернет, а если он есть, включи VPN.');
-  });
-}
-function duelBegin() {
-  DU.active = true;
-  DU.netShown = 0;
-  DU.myFin = undefined;
-  DU.oppFin = undefined;
-  DU.oppLeft = false;
-  DU.netLost = false;
-  DU.offlineSince = 0;
-  DU.lastBeat = 0;
-  DU.pos = { x: 0, v: 0, tr: -1, seen: performance.now() };
-  DU.ox = 0;
-  DU.oStarted = false;
-  DU.lastPub = 0;
-  startRace(DU.dist);
-}
-function duelMsg(buf) {
-  let m;
-  try { m = JSON.parse(buf.toString()); } catch (e) { return; }
-  if (!m) return;
-  DU.rx++;
-  if (m.id === DU.id) return;
-  if (typeof m.s === 'number') {
-    const key = m.id + ':' + m.s;
-    if (DU.seenKeys.has(key)) return;
-    DU.seenKeys.add(key);
-    if (DU.seenKeys.size > 600) DU.seenKeys = new Set(Array.from(DU.seenKeys).slice(-200));
-  }
-  if (m.id === DU.oppId) {
-    DU.pos.seen = performance.now();
-    DU.rxOpp++;
-  }
-  if (m.t === 'join' && DU.host && DU.state === 'wait') {
-    DU.oppId = m.id;
-    DU.state = 'race';
-    DU.delay = 1.1 + Math.random() * 1.5;
-    duelPub({ t: 'go', to: m.id, dist: DU.dist, delay: DU.delay });
-    duelBegin();
-  } else if (m.t === 'go' && !DU.host && m.to === DU.id && DU.state === 'joining') {
-    clearInterval(DU.joinTimer);
-    DU.oppId = m.id;
-    DU.state = 'race';
-    DU.dist = m.dist;
-    DU.delay = m.delay;
-    duelBegin();
-  } else if (m.id === DU.oppId) {
-    if (m.t === 'pos') {
-      if (typeof m.s !== 'number' || m.s > DU.lastPosSeq) {
-        if (typeof m.s === 'number') DU.lastPosSeq = m.s;
-        DU.pos = { x: m.x, v: m.v, tr: m.tr, seen: performance.now() };
-      }
-    } else if (m.t === 'fin') {
-      DU.oppFin = m.T === null ? 'dnf' : m.T;
-    } else if (m.t === 'leave') {
-      DU.oppLeft = true;
-    }
-  }
-}
-function duelMoveOpp(tReal, dt) {
-  const r = race.ghost;
-  const p = DU.pos;
-  let target = 0, v = 0;
-  if (p.tr >= 0) {
-    DU.oStarted = true;
-    v = p.v;
-    target = p.x + p.v * clamp(tReal - p.tr, 0, 0.6);
-  }
-  if (typeof DU.oppFin === 'number') target = race.dist;
-  target = Math.min(target, race.dist);
-  DU.ox += (target - DU.ox) * Math.min(1, dt * 10);
-  r.root.position.z = -DU.ox + RUN_OFFSET;
-  if (DU.oStarted) r.phase += dt * Math.PI * (3.3 + 0.1 * v);
-  poseRunner(r, r.phase, v, DU.oStarted ? 'run' : 'crouch');
-  return DU.ox;
-}
-function duelTick(nowS, tReal) {
-  const now = performance.now();
-  if (race.state === 'run' && tReal - DU.lastPub >= 0.2) {
-    DU.lastPub = tReal;
-    duelPub({ t: 'pos', x: sprinter.x, v: sprinter.v, tr: tReal });
-  } else if (now - DU.lastBeat > 1000) {
-    DU.lastBeat = now;
-    duelPub({ t: 'hb' });
-  }
-  if (now - (DU.netShown || 0) > 500) {
-    DU.netShown = now;
-    const el = $('duNet');
-    const silent = Math.floor((now - DU.pos.seen) / 1000);
-    el.hidden = false;
-    el.className = 'du-net' + (silent >= 4 || !duelOnline() ? ' bad' : '');
-    el.textContent = duelNetText() + ' · ↑' + DU.tx + ' ↓' + DU.rx + ' от соперника ' + DU.rxOpp + (silent >= 4 ? ' · нет сигнала ' + silent + ' с' : '');
-  }
-  if (duelOnline()) DU.offlineSince = 0;
-  else if (!DU.offlineSince) DU.offlineSince = now;
-  if (race.state === 'run' && DU.offlineSince && now - DU.offlineSince > DU_OFFLINE_MS) DU.netLost = true;
-  if (race.state === 'run' && now - DU.pos.seen > DU_SILENCE_MS && !DU.netLost) DU.oppLeft = true;
-  if ((DU.oppLeft || DU.netLost) && race.state === 'run' && DU.myFin === undefined) {
-    DU.myFin = DU.netLost ? 'lost' : 'win';
-    race.state = 'finished';
-    sprinter.live = false;
-    const tok = race.token;
-    setCall(DU.netLost ? 'СВЯЗЬ ПОТЕРЯНА' : 'СОПЕРНИК ВЫБЫЛ', DU.netLost ? 'bad' : 'go');
-    setTimeout(() => { if (tok === race.token && mode === 'race') duelResult(); }, 1500);
-  }
-}
-function duelFinish(T) {
-  setCall('ФИНИШ', 'go');
-  beep(880, 0.25, 'triangle', 0.15);
-  DU.myFin = T;
-  duelPub({ t: 'fin', T });
-  const tok = race.token;
-  const t0 = performance.now();
-  const check = () => {
-    if (tok !== race.token || mode !== 'race') return;
-    if (DU.oppFin !== undefined || DU.oppLeft || performance.now() - t0 > 12000) duelResult();
-    else setTimeout(check, 300);
-  };
-  setTimeout(check, 1200);
-}
-function duelResult() {
-  if (race.duelDone === race.token) return;
-  race.duelDone = race.token;
-  const my = typeof DU.myFin === 'number' ? DU.myFin : null;
-  const opp = typeof DU.oppFin === 'number' ? DU.oppFin : null;
-  const win = DU.netLost ? false : (my !== null && (opp === null || my < opp)) || (DU.oppLeft && my === null);
-  const d = race.dist;
-  const coins = Math.round(BASE_PAY[d] * LIFE_MULT[save.life] * (win ? 1 : 0.3));
-  save.coins += coins;
-  persist();
-  show('result');
-  $('resAgain').hidden = true;
-  $('resKicker').textContent = 'Дуэль ' + d + ' м';
-  $('resTitle').textContent = win ? 'Победа' : 'Поражение';
-  $('resTimeWrap').hidden = my === null;
-  if (my !== null) $('resTime').textContent = my.toFixed(2);
-  $('resBanners').innerHTML = DU.netLost ? '<div class="banner">У тебя пропала связь с сервером.</div>' : (DU.oppLeft && opp === null ? '<div class="banner">Соперник вышел из забега.</div>' : '');
-  const rows = [['Твой результат', my === null ? 'не добежал' : my.toFixed(2) + ' с'], ['Соперник', opp === null ? 'не добежал' : opp.toFixed(2) + ' с']];
-  if (my !== null && opp !== null) rows.push(['Разница', (my - opp > 0 ? '+' : '') + (my - opp).toFixed(2) + ' с']);
-  rows.push(['Монеты', '+' + coins + ' М', 'gold']);
-  $('resRows').innerHTML = rowsHtml(rows);
-}
-$('toDuel').addEventListener('click', duelEnter);
-$('duCreate').addEventListener('click', duelCreate);
-$('duJoin').addEventListener('click', duelJoin);
-$('duBack').addEventListener('click', () => { duelLeave(); enterHome(); });
-$('duCancel').addEventListener('click', () => { duelLeave(); duelShow(false); });
 function startRace(dist) {
   if (!renderer) return;
   fxReset();
   fxRoll();
-  $('duNet').hidden = !DU.active;
   race.token++;
   race.dist = dist;
   mode = 'race';
@@ -1351,12 +1053,12 @@ function startRace(dist) {
   worldJump.visible = false;
   buildTrack(dist);
   const me = makeRunner({ shirt: 0xe2553a, skin: SKINS[0] });
-  const ghost = DU.active ? makeRunner({ shirt: 0x4f8cff, skin: SKINS[1] }) : makeRunner({ ghost: true });
+  const ghost = makeRunner({ ghost: true });
   const ev = effNow();
   const avg = (ev.power + ev.speed + ev.endur) / 3;
   const mults = [0.85, 1.0, 1.2];
   const skins = SKINS.slice(1).sort(() => Math.random() - 0.5);
-  const rivals = DU.active ? [] : R_LANES.map((lane, i) => {
+  const rivals = R_LANES.map((lane, i) => {
     const runner = makeRunner({ shirt: RIVAL_SHIRTS[i], skin: skins[i % skins.length] });
     const st = statsFor(rivalLevels(avg, mults[i]));
     const rt = 0.17 + Math.random() * 0.14;
@@ -1449,7 +1151,7 @@ function raceTick(dt, nowS) {
     race.timer -= dt;
     if (race.timer <= 0) {
       race.state = 'count1';
-      race.gunAt = nowS + (DU.active ? DU.delay : 1.1 + Math.random() * 1.5);
+      race.gunAt = nowS + (1.1 + Math.random() * 1.5);
       setCall('ВНИМАНИЕ', 'warn');
       beep(660, 0.18, 'square', 0.12);
     }
@@ -1501,8 +1203,7 @@ function raceTick(dt, nowS) {
     me.root.position.y = 0.06 * k;
   }
   poseRunner(me, me.phase, sprinter.v, pm);
-  const gx = DU.active ? duelMoveOpp(tReal, dt) : moveAuto(race.ghost, race.ghostSim, 0.146, tReal, dt);
-  if (DU.active) duelTick(nowS, tReal);
+  const gx = moveAuto(race.ghost, race.ghostSim, 0.146, tReal, dt);
   const rx = race.rivals.map(r => moveAuto(r.runner, r.sim, r.rt, tReal, dt));
   const px = sprinter.x;
   cam.k = Math.min(8, cam.k + dt * 2);
@@ -1525,10 +1226,10 @@ function raceTick(dt, nowS) {
     const dx = gx - px;
     const gd = $('gdelta');
     if (dx > 0.05) {
-      gd.textContent = (DU.active ? 'Соперник впереди на ' : 'Рекорд впереди на ') + dx.toFixed(1) + ' м';
+      gd.textContent = 'Рекорд впереди на ' + dx.toFixed(1) + ' м';
       gd.className = 'behind';
     } else {
-      gd.textContent = (DU.active ? 'Ты впереди на ' : 'Ты быстрее рекорда на ') + Math.max(0, -dx).toFixed(1) + ' м';
+      gd.textContent = 'Ты быстрее рекорда на ' + Math.max(0, -dx).toFixed(1) + ' м';
       gd.className = 'ahead';
     }
   }
@@ -1558,10 +1259,6 @@ function raceTick(dt, nowS) {
 }
 function doFaint(why) {
   if (race.state !== 'run') return;
-  if (DU.active) {
-    DU.myFin = 'dnf';
-    duelPub({ t: 'fin', T: null });
-  }
   race.state = 'faint';
   race.faintAt = performance.now() / 1000;
   race.faintWhy = why;
@@ -1577,7 +1274,7 @@ function doFaint(why) {
 }
 function showFaint() {
   show('result');
-  $('resAgain').hidden = !!DU.active;
+  $('resAgain').hidden = false;
   $('resTimeWrap').hidden = true;
   $('blk').style.opacity = '0';
   $('resKicker').textContent = 'Забег ' + race.dist + ' м';
@@ -1597,10 +1294,6 @@ function onFinish() {
   race.state = 'finished';
   stamSet(Math.max(0, stamNow() - race.need * 0.35 * clamp(fadeDrop(sprinter.p, sprinter.tm) / 0.3, 0, 1)));
   sprinter.live = false;
-  if (DU.active) {
-    duelFinish(race.finishT);
-    return;
-  }
   const res = settle();
   setCall('ФИНИШ', 'go');
   beep(880, 0.25, 'triangle', 0.15);
@@ -1988,7 +1681,6 @@ $('resAgain').addEventListener('click', () => {
   startRace(race.dist);
 });
 $('resMenu').addEventListener('click', () => {
-  duelLeave();
   race.token++;
   selDist = race.dist;
   enterHome();
