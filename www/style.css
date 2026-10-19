@@ -268,3 +268,9 @@ h1, h2, p { margin: 0; }
 .du-err:empty { display: none; }
 #duWait .label { margin: 0; }
 #duWait .hint { margin: 0; }
+
+.du-net { margin-top: 4px; font: 600 11px var(--f-data); color: var(--dim); letter-spacing: .02em; }
+.du-net.bad { color: var(--stop); }
+.du-net[hidden] { display: none; }
+.du-brokers { display: flex; gap: 6px; flex-wrap: wrap; font: 600 12px var(--f-data); color: var(--dim); }
+.du-brokers span.ok { color: var(--go); }

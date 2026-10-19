@@ -1045,11 +1045,17 @@ function rivalLevels(avg, mult) {
 }
 const DU_TOPIC = 'sprint-duel-v1/';
 const DU_BROKERS = window.SPRINT_BROKERS || ['wss://broker.hivemq.com:8884/mqtt', 'wss://broker.emqx.io:8084/mqtt', 'wss://test.mosquitto.org:8081/mqtt', 'wss://mqtt.eclipseprojects.io:443/mqtt'];
+const DU_NAMES = ['hivemq', 'emqx', 'mosquitto', 'eclipse'];
 const DU_SILENCE_MS = 14000;
 const DU_OFFLINE_MS = 12000;
 const DU = { clients: [], id: '', code: '', host: false, dist: 60, oppId: null, state: 'idle', active: false, delay: 1.5, pos: { x: 0, v: 0, tr: -1, seen: 0 }, ox: 0, oPhase: 0, oStarted: false, myFin: undefined, oppFin: undefined, oppLeft: false, netLost: false, lastPub: 0, lastBeat: 0, seq: 0, seenKeys: new Set(), lastPosSeq: -1, offlineSince: 0, joinTimer: null, waitTimer: null, connectTimer: null };
 function duelStatus(t) {
   $('duStatus').textContent = t;
+}
+function duelNetText() {
+  const total = DU.clients.length;
+  const on = DU.clients.filter(c => c.connected).length;
+  return DU.clients.map((c, i) => (c.connected ? '✓' : '✗') + (DU_NAMES[i] || i)).join(' ') + ' (' + on + '/' + total + ')';
 }
 function duelOnline() {
   return DU.clients.some(c => c.connected);
@@ -1079,6 +1085,10 @@ function duelLeave() {
   DU.active = false;
   DU.state = 'idle';
 }
+function duelBrokerStatus() {
+  const el = $('duBrokers');
+  if (el) el.textContent = 'Серверы: ' + duelNetText();
+}
 function duelConnect(onReady, onFail) {
   duelClose();
   DU.seenKeys = new Set();
@@ -1100,7 +1110,9 @@ function duelConnect(onReady, onFail) {
     }
     DU.clients.push(c);
     c.on('error', () => {});
+    c.on('close', () => { if (DU.state === 'connecting' || DU.state === 'wait' || DU.state === 'joining') duelBrokerStatus(); });
     c.on('connect', () => {
+      if (DU.state === 'connecting' || DU.state === 'wait' || DU.state === 'joining') duelBrokerStatus();
       c.subscribe(DU_TOPIC + DU.code, { qos: 0 }, err => {
         if (err || ready) return;
         ready = true;
@@ -1110,6 +1122,7 @@ function duelConnect(onReady, onFail) {
     });
     c.on('message', (tp, buf) => duelMsg(buf));
   });
+  duelBrokerStatus();
   if (!DU.clients.length) {
     clearTimeout(DU.connectTimer);
     onFail();
@@ -1179,6 +1192,7 @@ function duelJoin() {
 }
 function duelBegin() {
   DU.active = true;
+  DU.netShown = 0;
   DU.myFin = undefined;
   DU.oppFin = undefined;
   DU.oppLeft = false;
@@ -1254,6 +1268,14 @@ function duelTick(nowS, tReal) {
     DU.lastBeat = now;
     duelPub({ t: 'hb' });
   }
+  if (now - (DU.netShown || 0) > 500) {
+    DU.netShown = now;
+    const el = $('duNet');
+    const silent = Math.floor((now - DU.pos.seen) / 1000);
+    el.hidden = false;
+    el.className = 'du-net' + (silent >= 4 || !duelOnline() ? ' bad' : '');
+    el.textContent = duelNetText() + (silent >= 4 ? ' · нет сигнала ' + silent + ' с' : ' · соперник на связи');
+  }
   if (duelOnline()) DU.offlineSince = 0;
   else if (!DU.offlineSince) DU.offlineSince = now;
   if (race.state === 'run' && DU.offlineSince && now - DU.offlineSince > DU_OFFLINE_MS) DU.netLost = true;
@@ -1312,6 +1334,7 @@ function startRace(dist) {
   if (!renderer) return;
   fxReset();
   fxRoll();
+  $('duNet').hidden = !DU.active;
   race.token++;
   race.dist = dist;
   mode = 'race';
