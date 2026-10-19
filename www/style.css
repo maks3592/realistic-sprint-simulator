@@ -256,8 +256,15 @@ h1, h2, p { margin: 0; }
   .call.pop { animation: none; }
 }
 .duo .btn.wide { grid-column: 1 / -1; }
-.du-join { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.du-join input { min-width: 0; padding: 0 14px; border-radius: 16px; border: 1.5px solid var(--line); background: rgba(14,21,38,.9); color: var(--ink); font: 700 22px var(--f-data); letter-spacing: .3em; text-align: center; }
-.du-join .btn { align-items: center; justify-content: center; font-size: 18px; }
+#duMenu, #duWait { display: grid; gap: 12px; }
+#duMenu[hidden], #duWait[hidden] { display: none; }
+#duMenu .btn, #duWait .btn { width: 100%; min-height: 56px; margin: 0; }
+.du-join { display: grid; grid-template-columns: 1.1fr 1fr; gap: 10px; }
+.du-join input::placeholder { letter-spacing: 0; font-size: 16px; font-weight: 600; color: var(--mute, #8c97b3); }
+.du-join input { min-width: 0; min-height: 56px; padding: 0 14px; border-radius: 16px; border: 1.5px solid var(--line); background: rgba(14,21,38,.9); color: var(--ink); font: 700 22px var(--f-data); letter-spacing: .3em; text-align: center; }
+.du-join .btn { align-items: center; justify-content: center; font-size: 18px; min-height: 56px; }
 .du-code { font: 800 64px/1 var(--f-display); letter-spacing: .2em; text-align: center; color: var(--gold); padding: 6px 0; }
-.du-err { color: #ff8a7a; min-height: 1.2em; }
+.du-err { color: #ff8a7a; min-height: 0; }
+.du-err:empty { display: none; }
+#duWait .label { margin: 0; }
+#duWait .hint { margin: 0; }

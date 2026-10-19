@@ -1044,83 +1044,76 @@ function rivalLevels(avg, mult) {
   return { power: pick(), speed: pick(), endur: pick() };
 }
 const DU_TOPIC = 'sprint-duel-v1/';
-const DU_BROKERS = window.SPRINT_BROKERS || ['wss://broker.hivemq.com:8884/mqtt', 'wss://broker.emqx.io:8084/mqtt'];
-const DU = { client: null, id: '', code: '', host: false, dist: 60, oppId: null, state: 'idle', active: false, delay: 1.5, pos: { x: 0, v: 0, tr: -1, seen: 0 }, ox: 0, oPhase: 0, oStarted: false, myFin: undefined, oppFin: undefined, oppLeft: false, lastPub: 0, joinTimer: null, waitTimer: null };
+const DU_BROKERS = window.SPRINT_BROKERS || ['wss://broker.hivemq.com:8884/mqtt', 'wss://broker.emqx.io:8084/mqtt', 'wss://test.mosquitto.org:8081/mqtt', 'wss://mqtt.eclipseprojects.io:443/mqtt'];
+const DU_SILENCE_MS = 14000;
+const DU_OFFLINE_MS = 12000;
+const DU = { clients: [], id: '', code: '', host: false, dist: 60, oppId: null, state: 'idle', active: false, delay: 1.5, pos: { x: 0, v: 0, tr: -1, seen: 0 }, ox: 0, oPhase: 0, oStarted: false, myFin: undefined, oppFin: undefined, oppLeft: false, netLost: false, lastPub: 0, lastBeat: 0, seq: 0, seenKeys: new Set(), lastPosSeq: -1, offlineSince: 0, joinTimer: null, waitTimer: null, connectTimer: null };
 function duelStatus(t) {
   $('duStatus').textContent = t;
 }
+function duelOnline() {
+  return DU.clients.some(c => c.connected);
+}
 function duelPub(o) {
-  if (!DU.client || !DU.client.connected) return;
   o.id = DU.id;
-  try { DU.client.publish(DU_TOPIC + DU.code, JSON.stringify(o), { qos: 0 }); } catch (e) {}
+  o.s = ++DU.seq;
+  const text = JSON.stringify(o);
+  DU.clients.forEach(c => {
+    if (!c.connected) return;
+    try { c.publish(DU_TOPIC + DU.code, text, { qos: 0 }); } catch (e) {}
+  });
 }
 function duelClose() {
   clearInterval(DU.joinTimer);
   clearTimeout(DU.waitTimer);
-  const c = DU.client;
-  DU.client = null;
-  if (c) {
+  clearTimeout(DU.connectTimer);
+  const list = DU.clients;
+  DU.clients = [];
+  list.forEach(c => {
     try { c.end(true); } catch (e) {}
-  }
+  });
 }
 function duelLeave() {
-  if (DU.client) duelPub({ t: 'leave' });
+  if (DU.clients.length) duelPub({ t: 'leave' });
   duelClose();
   DU.active = false;
   DU.state = 'idle';
 }
-function duelLost() {
-  if (!DU.client) return;
-  DU.client = null;
-  if (DU.active) {
-    DU.oppLeft = true;
-  } else if (DU.state === 'wait' || DU.state === 'joining') {
-    DU.state = 'idle';
-    duelStatus('Связь потеряна. Вернись и попробуй снова.');
-  }
-}
 function duelConnect(onReady, onFail) {
-  let i = 0;
-  const next = () => {
-    if (i >= DU_BROKERS.length) {
+  duelClose();
+  DU.seenKeys = new Set();
+  DU.lastPosSeq = -1;
+  DU.seq = 0;
+  let ready = false;
+  DU.connectTimer = setTimeout(() => {
+    if (!ready) {
+      duelClose();
       onFail();
-      return;
     }
-    const url = DU_BROKERS[i++];
-    let done = false;
+  }, 12000);
+  DU_BROKERS.forEach(url => {
     let c;
     try {
-      c = mqtt.connect(url, { clientId: 'sp' + Math.random().toString(16).slice(2, 10), connectTimeout: 7000, reconnectPeriod: 0, clean: true });
+      c = mqtt.connect(url, { clientId: 'sp' + Math.random().toString(16).slice(2, 10), connectTimeout: 8000, reconnectPeriod: 2000, keepalive: 20, clean: true });
     } catch (e) {
-      next();
       return;
     }
-    const fail = () => {
-      if (done) return;
-      done = true;
-      try { c.end(true); } catch (e) {}
-      next();
-    };
-    c.on('error', fail);
-    c.on('close', () => {
-      if (!done) fail();
-      else if (DU.client === c) duelLost();
-    });
+    DU.clients.push(c);
+    c.on('error', () => {});
     c.on('connect', () => {
       c.subscribe(DU_TOPIC + DU.code, { qos: 0 }, err => {
-        if (err) {
-          fail();
-          return;
-        }
-        done = true;
-        DU.client = c;
-        c.on('message', (tp, buf) => duelMsg(buf));
+        if (err || ready) return;
+        ready = true;
+        clearTimeout(DU.connectTimer);
         onReady();
       });
     });
-    setTimeout(() => { if (!done) fail(); }, 8000);
-  };
-  next();
+    c.on('message', (tp, buf) => duelMsg(buf));
+  });
+  if (!DU.clients.length) {
+    clearTimeout(DU.connectTimer);
+    onFail();
+  }
 }
 function duelShow(wait) {
   $('duMenu').hidden = wait;
@@ -1146,7 +1139,7 @@ function duelCreate() {
     duelStatus('Ждём соперника. Дистанция ' + DU.dist + ' м. Продиктуй другу код.');
   }, () => {
     DU.state = 'idle';
-    duelStatus('Нет связи с сервером. Проверь интернет.');
+    duelStatus('Серверы недоступны. Проверь интернет, а если он есть, включи VPN.');
   });
 }
 function duelJoin() {
@@ -1171,7 +1164,7 @@ function duelJoin() {
         clearInterval(DU.joinTimer);
         return;
       }
-      if (++n > 6) {
+      if (++n > 12) {
         clearInterval(DU.joinTimer);
         DU.state = 'idle';
         duelStatus('Комната не найдена. Проверь код и что друг уже её создал.');
@@ -1181,7 +1174,7 @@ function duelJoin() {
     }, 1500);
   }, () => {
     DU.state = 'idle';
-    duelStatus('Нет связи с сервером. Проверь интернет.');
+    duelStatus('Серверы недоступны. Проверь интернет, а если он есть, включи VPN.');
   });
 }
 function duelBegin() {
@@ -1189,6 +1182,9 @@ function duelBegin() {
   DU.myFin = undefined;
   DU.oppFin = undefined;
   DU.oppLeft = false;
+  DU.netLost = false;
+  DU.offlineSince = 0;
+  DU.lastBeat = 0;
   DU.pos = { x: 0, v: 0, tr: -1, seen: performance.now() };
   DU.ox = 0;
   DU.oStarted = false;
@@ -1199,6 +1195,11 @@ function duelMsg(buf) {
   let m;
   try { m = JSON.parse(buf.toString()); } catch (e) { return; }
   if (!m || m.id === DU.id) return;
+  const key = m.id + ':' + m.s;
+  if (DU.seenKeys.has(key)) return;
+  DU.seenKeys.add(key);
+  if (DU.seenKeys.size > 600) DU.seenKeys = new Set(Array.from(DU.seenKeys).slice(-200));
+  if (m.id === DU.oppId) DU.pos.seen = performance.now();
   if (m.t === 'join' && DU.host && DU.state === 'wait') {
     DU.oppId = m.id;
     DU.state = 'race';
@@ -1214,7 +1215,10 @@ function duelMsg(buf) {
     duelBegin();
   } else if (m.id === DU.oppId) {
     if (m.t === 'pos') {
-      DU.pos = { x: m.x, v: m.v, tr: m.tr, seen: performance.now() };
+      if (m.s > DU.lastPosSeq) {
+        DU.lastPosSeq = m.s;
+        DU.pos = { x: m.x, v: m.v, tr: m.tr, seen: performance.now() };
+      }
     } else if (m.t === 'fin') {
       DU.oppFin = m.T === null ? 'dnf' : m.T;
     } else if (m.t === 'leave') {
@@ -1240,17 +1244,24 @@ function duelMoveOpp(tReal, dt) {
   return DU.ox;
 }
 function duelTick(nowS, tReal) {
+  const now = performance.now();
   if (race.state === 'run' && tReal - DU.lastPub >= 0.12) {
     DU.lastPub = tReal;
     duelPub({ t: 'pos', x: sprinter.x, v: sprinter.v, tr: tReal });
+  } else if (now - DU.lastBeat > 1000) {
+    DU.lastBeat = now;
+    duelPub({ t: 'hb' });
   }
-  if (race.state === 'run' && DU.pos.tr >= 0 && performance.now() - DU.pos.seen > 7000) DU.oppLeft = true;
-  if (DU.oppLeft && race.state === 'run' && DU.myFin === undefined) {
-    DU.myFin = 'win';
+  if (duelOnline()) DU.offlineSince = 0;
+  else if (!DU.offlineSince) DU.offlineSince = now;
+  if (race.state === 'run' && DU.offlineSince && now - DU.offlineSince > DU_OFFLINE_MS) DU.netLost = true;
+  if (race.state === 'run' && now - DU.pos.seen > DU_SILENCE_MS && !DU.netLost) DU.oppLeft = true;
+  if ((DU.oppLeft || DU.netLost) && race.state === 'run' && DU.myFin === undefined) {
+    DU.myFin = DU.netLost ? 'lost' : 'win';
     race.state = 'finished';
     sprinter.live = false;
     const tok = race.token;
-    setCall('СОПЕРНИК ВЫБЫЛ', 'go');
+    setCall(DU.netLost ? 'СВЯЗЬ ПОТЕРЯНА' : 'СОПЕРНИК ВЫБЫЛ', DU.netLost ? 'bad' : 'go');
     setTimeout(() => { if (tok === race.token && mode === 'race') duelResult(); }, 1500);
   }
 }
@@ -1273,7 +1284,7 @@ function duelResult() {
   race.duelDone = race.token;
   const my = typeof DU.myFin === 'number' ? DU.myFin : null;
   const opp = typeof DU.oppFin === 'number' ? DU.oppFin : null;
-  const win = my !== null && (opp === null || my < opp);
+  const win = DU.netLost ? false : (my !== null && (opp === null || my < opp)) || (DU.oppLeft && my === null);
   const d = race.dist;
   const coins = Math.round(BASE_PAY[d] * LIFE_MULT[save.life] * (win ? 1 : 0.3));
   save.coins += coins;
@@ -1284,7 +1295,7 @@ function duelResult() {
   $('resTitle').textContent = win ? 'Победа' : 'Поражение';
   $('resTimeWrap').hidden = my === null;
   if (my !== null) $('resTime').textContent = my.toFixed(2);
-  $('resBanners').innerHTML = DU.oppLeft && opp === null ? '<div class="banner">Соперник вышел из забега.</div>' : '';
+  $('resBanners').innerHTML = DU.netLost ? '<div class="banner">У тебя пропала связь с сервером.</div>' : (DU.oppLeft && opp === null ? '<div class="banner">Соперник вышел из забега.</div>' : '');
   const rows = [['Твой результат', my === null ? 'не добежал' : my.toFixed(2) + ' с'], ['Соперник', opp === null ? 'не добежал' : opp.toFixed(2) + ' с']];
   if (my !== null && opp !== null) rows.push(['Разница', (my - opp > 0 ? '+' : '') + (my - opp).toFixed(2) + ' с']);
   rows.push(['Монеты', '+' + coins + ' М', 'gold']);
